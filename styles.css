@@ -559,11 +559,35 @@ a {
   font-weight: 800;
 }
 
+.reader-tools {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 42px 42px 78px;
+  gap: 8px;
+  align-items: center;
+}
+
+.reader-tools label {
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.reader-tools select {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: var(--surface-strong);
+}
+
 .parallel-reader {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
   background: var(--surface-strong);
+  --reader-font: 1rem;
 }
 
 .parallel-reader header p {
@@ -574,7 +598,12 @@ a {
 
 .parallel-columns {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
+}
+
+.parallel-reader.is-stacked .parallel-columns {
+  grid-template-columns: 1fr;
 }
 
 .parallel-columns h4,
@@ -588,6 +617,7 @@ a {
 
 .parallel-columns p {
   line-height: 1.72;
+  font-size: var(--reader-font);
 }
 
 .reader-actions {
@@ -599,6 +629,92 @@ a {
 
 .reader-actions button {
   width: 100%;
+}
+
+.reader-support {
+  display: grid;
+  gap: 12px;
+}
+
+.glossary-card,
+.reading-note-form,
+.reading-notes {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--surface-strong);
+}
+
+.glossary-card h2,
+.reading-note-form h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+#termList {
+  display: grid;
+  gap: 8px;
+}
+
+.term-button {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 32%, var(--surface));
+  text-align: left;
+}
+
+.term-button strong,
+.term-button span {
+  display: block;
+}
+
+.term-button strong {
+  margin-bottom: 4px;
+}
+
+.term-button span,
+.note-meta {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.reading-note-form {
+  display: grid;
+  gap: 10px;
+}
+
+.reading-note-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--ink);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.reading-notes {
+  display: grid;
+  gap: 10px;
+}
+
+.note-card {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.note-card:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.note-card p {
+  margin: 4px 0 0;
+  line-height: 1.6;
 }
 
 .work-nav {
@@ -1012,6 +1128,15 @@ a {
 
   .reader-tabs {
     grid-template-columns: 1fr;
+  }
+
+  .reader-tools {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reader-tools label,
+  .reader-tools select {
+    grid-column: 1 / -1;
   }
 
   .reader-actions,

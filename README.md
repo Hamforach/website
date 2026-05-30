@@ -37,7 +37,16 @@ The library list is a compact entry point into the text archive. Each item links
 
 ### Bilingual Reader
 
-The reader panel presents short English and Chinese parallel passages. It currently includes examples for Hermetic and comparative mythology texts. A passage can be quoted into a new forum thread for discussion.
+The reader panel presents English and Chinese parallel passages with a small reading workspace. It currently includes examples for Hermetic and comparative mythology texts.
+
+Reader features include:
+
+- Passage switching within each selected text.
+- Adjustable reading font size.
+- Parallel-column and single-column layout modes.
+- Glossary cards for key terms.
+- Local reading notes saved in `localStorage`.
+- Quoting the current passage or a glossary term into a new forum thread.
 
 ### Text Archive Pages
 

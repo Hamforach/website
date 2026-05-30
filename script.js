@@ -129,6 +129,81 @@ const readings = {
   },
 };
 
+const readingEnhancements = {
+  emerald: {
+    passages: [
+      {
+        label: "1. 上下对应",
+        en: "That which is below is like that which is above, and that which is above is like that which is below, to accomplish the miracles of one thing.",
+        zh: "下者如上，上者如下，由此成就一物之奇迹。",
+      },
+      {
+        label: "2. 一物之源",
+        en: "And as all things were from one, by the mediation of one, so all things were born from this one thing by adaptation.",
+        zh: "万物皆由一而来，经由一之调和；万物亦因适应而从此一物生出。",
+      },
+      {
+        label: "3. 象征性读法",
+        en: "The sentence is often read as a compact statement of correspondence rather than a literal cosmology.",
+        zh: "此句常被理解为对应原则的浓缩表达，而非一套字面宇宙论。",
+      },
+    ],
+    terms: [
+      ["Correspondence", "对应；上下层面之间的结构性呼应。"],
+      ["One Thing", "一物；可作为统一原则、素材或象征中心来讨论。"],
+      ["Adaptation", "适应/调和；指从同一来源生成差异的过程。"],
+    ],
+  },
+  kybalion: {
+    passages: [
+      {
+        label: "1. 对应原则",
+        en: "This principle embodies the truth that there is always a correspondence between the laws and phenomena of the various planes of being and life.",
+        zh: "此原则说明：存在与生命的各个层面，其法则与现象之间总有对应关系。",
+      },
+      {
+        label: "2. 术语边界",
+        en: "The value of the passage depends on how carefully its key terms are defined before interpretation.",
+        zh: "这一段的价值取决于解释之前是否谨慎界定核心术语。",
+      },
+      {
+        label: "3. 论坛讨论方向",
+        en: "Readers may compare correspondence with analogy, sympathy, and symbolic parallelism.",
+        zh: "读者可比较“对应”与类比、感应、象征平行之间的差异。",
+      },
+    ],
+    terms: [
+      ["Plane", "层面；存在、心理或象征秩序的分层。"],
+      ["Law", "法则；文本内部用来组织现象的原则。"],
+      ["Phenomenon", "现象；可被观察、分类或象征化的对象。"],
+    ],
+  },
+  golden: {
+    passages: [
+      {
+        label: "1. 林中王",
+        en: "The priest who bore the title of King of the Wood had won his office by slaying his predecessor in single combat.",
+        zh: "拥有林中王称号的祭司，是通过单独决斗杀死前任而取得其职分的。",
+      },
+      {
+        label: "2. 阅读警示",
+        en: "Frazer's comparative method is historically important, but its conclusions should be read with modern methodological caution.",
+        zh: "弗雷泽的比较方法具有历史重要性，但其结论应结合现代方法论谨慎阅读。",
+      },
+      {
+        label: "3. 讨论入口",
+        en: "A useful forum thread should separate textual summary, historical claim, and later interpretation.",
+        zh: "有效的论坛讨论应区分文本摘要、历史主张与后世解释。",
+      },
+    ],
+    terms: [
+      ["King of the Wood", "林中王；内米湖祭司职位的经典称谓。"],
+      ["Ritual Kingship", "仪式王权；与祭司、替代和牺牲相关的比较概念。"],
+      ["Comparative Method", "比较方法；需注意材料选择与时代局限。"],
+    ],
+  },
+};
+
 const books = [
   ["golden-bough", "The Golden Bough", "比较神话 · 英文公版"],
   ["secret-teachings", "The Secret Teachings of All Ages", "需核验版本 · 书目待定"],
@@ -226,6 +301,10 @@ const state = {
   search: "",
   sort: "latest",
   reading: "emerald",
+  readingPassage: 0,
+  readerFont: Number(localStorage.getItem("arcana-reader-font") || 1),
+  readerLayout: localStorage.getItem("arcana-reader-layout") || "parallel",
+  notes: loadReadingNotes(),
   work: "golden-bough",
   threads: loadThreads(),
 };
@@ -246,6 +325,11 @@ const workPage = document.querySelector("#workPage");
 const workMain = document.querySelector("#workMain");
 const workLinks = document.querySelector("#workLinks");
 const workIndexList = document.querySelector("#workIndexList");
+const passageSelect = document.querySelector("#readingPassageSelect");
+const parallelReader = document.querySelector(".parallel-reader");
+const termList = document.querySelector("#termList");
+const readingNoteForm = document.querySelector("#readingNoteForm");
+const readingNotes = document.querySelector("#readingNotes");
 
 function loadThreads() {
   const saved = localStorage.getItem("arcana-threads");
@@ -261,6 +345,22 @@ function loadThreads() {
 
 function saveThreads() {
   localStorage.setItem("arcana-threads", JSON.stringify(state.threads));
+}
+
+function loadReadingNotes() {
+  const saved = localStorage.getItem("arcana-reading-notes");
+  if (!saved) return [];
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveReadingNotes() {
+  localStorage.setItem("arcana-reading-notes", JSON.stringify(state.notes));
 }
 
 function getBoard(id) {
@@ -360,16 +460,75 @@ function renderThreads() {
     .join("");
 }
 
+function getCurrentPassage() {
+  const reading = readings[state.reading];
+  const extra = readingEnhancements[state.reading];
+  const passages = extra?.passages || [{ label: "摘录", en: reading.en, zh: reading.zh }];
+  if (state.readingPassage >= passages.length) state.readingPassage = 0;
+  return passages[state.readingPassage];
+}
+
+function renderReadingNotes() {
+  const related = state.notes.filter(
+    (note) => note.reading === state.reading && note.passage === state.readingPassage,
+  );
+
+  if (!related.length) {
+    readingNotes.innerHTML = `<p class="note-meta">这一段还没有本地笔记。</p>`;
+    return;
+  }
+
+  readingNotes.innerHTML = related
+    .slice()
+    .reverse()
+    .map(
+      (note) => `
+        <article class="note-card">
+          <span class="note-meta">${note.title} · ${note.time}</span>
+          <p>${note.body}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function renderReading() {
   const reading = readings[state.reading];
+  const extra = readingEnhancements[state.reading];
+  const passages = extra?.passages || [{ label: "摘录", en: reading.en, zh: reading.zh }];
+  const passage = getCurrentPassage();
+
   document.querySelector("#readingMeta").textContent = reading.meta;
   document.querySelector("#readingTitle").textContent = reading.title;
-  document.querySelector("#readingEn").textContent = reading.en;
-  document.querySelector("#readingZh").textContent = reading.zh;
+  document.querySelector("#readingEn").textContent = passage.en;
+  document.querySelector("#readingZh").textContent = passage.zh;
+
+  passageSelect.innerHTML = passages
+    .map((item, index) => `<option value="${index}">${item.label}</option>`)
+    .join("");
+  passageSelect.value = String(state.readingPassage);
+
+  termList.innerHTML = (extra?.terms || [])
+    .map(
+      ([term, note]) => `
+        <button class="term-button" type="button" data-term="${term}" data-term-note="${note}">
+          <strong>${term}</strong>
+          <span>${note}</span>
+        </button>
+      `,
+    )
+    .join("");
+
+  parallelReader.style.setProperty("--reader-font", `${state.readerFont}rem`);
+  parallelReader.classList.toggle("is-stacked", state.readerLayout === "stacked");
+  document.querySelector("#toggleReaderLayout").textContent =
+    state.readerLayout === "stacked" ? "双栏" : "单栏";
 
   document.querySelectorAll(".reader-tabs button").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.reading === state.reading);
   });
+
+  renderReadingNotes();
 }
 
 function renderWorkPage() {
@@ -597,14 +756,66 @@ document.querySelector(".reader-tabs").addEventListener("click", (event) => {
   const button = event.target.closest("[data-reading]");
   if (!button) return;
   state.reading = button.dataset.reading;
+  state.readingPassage = 0;
+  renderReading();
+});
+
+passageSelect.addEventListener("change", (event) => {
+  state.readingPassage = Number(event.target.value);
+  renderReading();
+});
+
+document.querySelector("#decreaseReaderFont").addEventListener("click", () => {
+  state.readerFont = Math.max(0.88, Number((state.readerFont - 0.08).toFixed(2)));
+  localStorage.setItem("arcana-reader-font", String(state.readerFont));
+  renderReading();
+});
+
+document.querySelector("#increaseReaderFont").addEventListener("click", () => {
+  state.readerFont = Math.min(1.32, Number((state.readerFont + 0.08).toFixed(2)));
+  localStorage.setItem("arcana-reader-font", String(state.readerFont));
+  renderReading();
+});
+
+document.querySelector("#toggleReaderLayout").addEventListener("click", () => {
+  state.readerLayout = state.readerLayout === "stacked" ? "parallel" : "stacked";
+  localStorage.setItem("arcana-reader-layout", state.readerLayout);
   renderReading();
 });
 
 document.querySelector("#quoteToPost").addEventListener("click", () => {
   const reading = readings[state.reading];
-  const prefill = `引用《${reading.title}》：\n\nEnglish: ${reading.en}\n\n中文译稿：${reading.zh}\n\n我的问题：`;
+  const passage = getCurrentPassage();
+  const prefill = `引用《${reading.title}》${passage.label}：\n\nEnglish: ${passage.en}\n\n中文译稿：${passage.zh}\n\n我的问题：`;
   openComposer(prefill);
   boardSelect.value = "translation";
+});
+
+termList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-term]");
+  if (!button) return;
+  const reading = readings[state.reading];
+  const prefill = `术语讨论：${button.dataset.term}\n\n出处：《${reading.title}》\n说明：${button.dataset.termNote}\n\n我的问题：`;
+  openComposer(prefill);
+  boardSelect.value = "translation";
+});
+
+readingNoteForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const textarea = readingNoteForm.elements.note;
+  const body = textarea.value.trim();
+  if (!body) return;
+
+  state.notes.push({
+    reading: state.reading,
+    passage: state.readingPassage,
+    title: `${readings[state.reading].title} / ${getCurrentPassage().label}`,
+    body,
+    time: "刚刚",
+  });
+  textarea.value = "";
+  saveReadingNotes();
+  renderReadingNotes();
 });
 
 document.querySelector("#openReadingArchive").addEventListener("click", () => {

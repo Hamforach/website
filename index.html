@@ -101,6 +101,14 @@
           <button type="button" data-reading="golden">金枝札记</button>
         </div>
 
+        <div class="reader-tools" aria-label="阅读工具">
+          <label for="readingPassageSelect">段落</label>
+          <select id="readingPassageSelect"></select>
+          <button class="icon-button" type="button" id="decreaseReaderFont" aria-label="减小字号">A-</button>
+          <button class="icon-button" type="button" id="increaseReaderFont" aria-label="增大字号">A+</button>
+          <button class="secondary-button" type="button" id="toggleReaderLayout">单栏</button>
+        </div>
+
         <article class="parallel-reader">
           <header>
             <p id="readingMeta"></p>
@@ -121,6 +129,21 @@
             <button class="secondary-button" type="button" id="quoteToPost">引用到新主题</button>
           </div>
         </article>
+
+        <section class="reader-support">
+          <div class="glossary-card">
+            <h2>术语卡</h2>
+            <div id="termList"></div>
+          </div>
+
+          <form class="reading-note-form" id="readingNoteForm">
+            <h2>阅读笔记</h2>
+            <textarea name="note" rows="4" placeholder="记录这一段的译法、出处或疑问"></textarea>
+            <button class="primary-button" type="submit">保存笔记</button>
+          </form>
+
+          <div class="reading-notes" id="readingNotes"></div>
+        </section>
 
         <section class="digest">
           <h2>今日校勘</h2>
