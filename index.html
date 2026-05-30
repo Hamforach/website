@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Arcana Commons Forum</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#" aria-label="Arcana Commons 首页">
+          <span class="brand-mark">AC</span>
+          <span>
+            <strong>Arcana Commons</strong>
+            <small>神秘学公版书籍论坛</small>
+          </span>
+        </a>
+
+        <nav class="top-nav" aria-label="主导航">
+          <a href="#forums">版块</a>
+          <a href="#reader">中英阅读</a>
+          <a href="#threads">主题</a>
+          <a href="#library">书库</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="icon-button" type="button" id="themeToggle" aria-label="切换主题">◐</button>
+          <button class="primary-button" type="button" id="openComposer">＋ 发主题</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="forum-shell" id="forums" aria-label="论坛首页">
+        <div class="notice-strip">
+          <span>公告</span>
+          <p>本论坛以公版文本、书目整理、翻译校勘和读书札记为核心，发帖前请标注文本来源。</p>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box" for="searchInput">
+            <span>⌕</span>
+            <input id="searchInput" type="search" placeholder="搜索主题、书名、作者或关键词">
+          </label>
+          <select id="sortSelect" aria-label="主题排序">
+            <option value="latest">最近回复</option>
+            <option value="replies">回复最多</option>
+            <option value="views">浏览最多</option>
+          </select>
+        </div>
+
+        <div class="content-grid">
+          <aside class="forum-sidebar" aria-label="版块列表">
+            <h2>分区</h2>
+            <div class="board-list" id="boardList"></div>
+
+            <section class="library-card" id="library">
+              <div class="section-title">
+                <h2>公版书架</h2>
+                <span>Public Domain</span>
+              </div>
+              <ul id="bookList"></ul>
+            </section>
+          </aside>
+
+          <section class="thread-panel" id="threads">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Thread Index</p>
+                <h1 id="boardTitle">全部主题</h1>
+              </div>
+              <div class="stats-row">
+                <span><strong id="threadCount">0</strong> 主题</span>
+                <span><strong id="replyCount">0</strong> 回复</span>
+              </div>
+            </div>
+
+            <div class="thread-table" id="threadList"></div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="reader-panel" id="reader" aria-label="中英对照阅读">
+        <div class="reader-art" aria-hidden="true">
+          <div class="manuscript">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>中英对照阅读</h2>
+          <span>Reading Desk</span>
+        </div>
+
+        <div class="reader-tabs" role="tablist" aria-label="阅读文本">
+          <button class="is-active" type="button" data-reading="emerald">翡翠碑</button>
+          <button type="button" data-reading="kybalion">凯巴莱恩</button>
+          <button type="button" data-reading="golden">金枝札记</button>
+        </div>
+
+        <article class="parallel-reader">
+          <header>
+            <p id="readingMeta"></p>
+            <h3 id="readingTitle"></h3>
+          </header>
+          <div class="parallel-columns">
+            <div>
+              <h4>English</h4>
+              <p id="readingEn"></p>
+            </div>
+            <div>
+              <h4>中文译稿</h4>
+              <p id="readingZh"></p>
+            </div>
+          </div>
+          <div class="reader-actions">
+            <button class="secondary-button" type="button" id="openReadingArchive">打开文本档案</button>
+            <button class="secondary-button" type="button" id="quoteToPost">引用到新主题</button>
+          </div>
+        </article>
+
+        <section class="digest">
+          <h2>今日校勘</h2>
+          <div id="digestList"></div>
+        </section>
+      </aside>
+
+      <section class="work-page" id="workPage" hidden aria-label="文本档案二级界面">
+        <div class="work-nav">
+          <button class="secondary-button" type="button" id="closeWorkPage">← 返回论坛</button>
+          <div class="work-links" id="workLinks"></div>
+        </div>
+
+        <article class="work-layout">
+          <aside class="work-index">
+            <p class="eyebrow">Browse</p>
+            <h2>文本索引</h2>
+            <div id="workIndexList"></div>
+          </aside>
+
+          <div class="work-main" id="workMain"></div>
+        </article>
+      </section>
+    </main>
+
+    <dialog class="thread-dialog" id="threadDialog">
+      <button class="close-button" type="button" id="closeThread" aria-label="关闭">×</button>
+      <div id="threadDetail"></div>
+    </dialog>
+
+    <dialog class="composer-dialog" id="composerDialog">
+      <form id="composerForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">New Thread</p>
+            <h2>发布主题</h2>
+          </div>
+          <button class="close-button" type="button" id="closeComposer" aria-label="关闭">×</button>
+        </div>
+
+        <label>
+          标题
+          <input name="title" required maxlength="72" placeholder="例如：关于《翡翠碑》第三句的译法">
+        </label>
+
+        <label>
+          版块
+          <select name="board"></select>
+        </label>
+
+        <label>
+          正文
+          <textarea name="body" required rows="7" placeholder="写下文本来源、问题、译稿或阅读笔记"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="secondary-button" type="button" id="cancelComposer">取消</button>
+          <button class="primary-button" type="submit">发布</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>
