@@ -83,6 +83,10 @@ The current build is plain HTML, CSS, and JavaScript. It can be opened directly 
 
 本原型尚未接入後端。使用者建立的主題、回覆、閱讀筆記與主題偏好會儲存在瀏覽器的 `localStorage`。
 
+### 公開部署準備
+
+前端已加入集中式資料存取層，之後可將目前的 `localStorage` 儲存替換為伺服器 API。動態渲染內容也會先進行 HTML 轉義，以降低公開接入使用者內容時的 XSS 風險。
+
 ### 後續計畫
 
 - 為版塊頁與文本檔案頁加入正式路由。
@@ -163,6 +167,10 @@ The composer modal allows users to create a new local thread. It includes title,
 ### Persistence
 
 This prototype does not use a backend. User-created threads, replies, reading notes, and theme preference are stored in browser `localStorage`.
+
+### Public Deployment Preparation
+
+The frontend now uses a centralized data access layer, so the current `localStorage` behavior can later be replaced with server API calls. Dynamically rendered content is escaped before insertion into the page to reduce XSS risk when public user content is introduced.
 
 ### Next Steps
 

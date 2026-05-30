@@ -1,3 +1,68 @@
+const APP_CONFIG = {
+  storagePrefix: "arcana",
+  apiBaseUrl: "",
+  persistence: "local",
+};
+
+const storageKey = (name) => `${APP_CONFIG.storagePrefix}-${name}`;
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    };
+    return entities[char];
+  });
+}
+
+function makeId(prefix) {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function readJSON(key, fallback) {
+  const saved = localStorage.getItem(storageKey(key));
+  if (!saved) return fallback;
+
+  try {
+    const parsed = JSON.parse(saved);
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJSON(key, value) {
+  localStorage.setItem(storageKey(key), JSON.stringify(value));
+}
+
+const forumStore = {
+  loadThreads() {
+    const saved = readJSON("threads", seedThreads);
+    return Array.isArray(saved) ? saved : seedThreads;
+  },
+  saveThreads(threads) {
+    writeJSON("threads", threads);
+  },
+  loadReadingNotes() {
+    const saved = readJSON("reading-notes", []);
+    return Array.isArray(saved) ? saved : [];
+  },
+  saveReadingNotes(notes) {
+    writeJSON("reading-notes", notes);
+  },
+  loadPreference(name, fallback) {
+    return localStorage.getItem(storageKey(name)) || fallback;
+  },
+  savePreference(name, value) {
+    localStorage.setItem(storageKey(name), value);
+  },
+};
+
 const boards = [
   {
     id: "all",
@@ -302,8 +367,8 @@ const state = {
   sort: "latest",
   reading: "emerald",
   readingPassage: 0,
-  readerFont: Number(localStorage.getItem("arcana-reader-font") || 1),
-  readerLayout: localStorage.getItem("arcana-reader-layout") || "parallel",
+  readerFont: Number(forumStore.loadPreference("reader-font", 1)),
+  readerLayout: forumStore.loadPreference("reader-layout", "parallel"),
   notes: loadReadingNotes(),
   work: "golden-bough",
   threads: loadThreads(),
@@ -332,35 +397,19 @@ const readingNoteForm = document.querySelector("#readingNoteForm");
 const readingNotes = document.querySelector("#readingNotes");
 
 function loadThreads() {
-  const saved = localStorage.getItem("arcana-threads");
-  if (!saved) return seedThreads;
-
-  try {
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : seedThreads;
-  } catch {
-    return seedThreads;
-  }
+  return forumStore.loadThreads();
 }
 
 function saveThreads() {
-  localStorage.setItem("arcana-threads", JSON.stringify(state.threads));
+  forumStore.saveThreads(state.threads);
 }
 
 function loadReadingNotes() {
-  const saved = localStorage.getItem("arcana-reading-notes");
-  if (!saved) return [];
-
-  try {
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return forumStore.loadReadingNotes();
 }
 
 function saveReadingNotes() {
-  localStorage.setItem("arcana-reading-notes", JSON.stringify(state.notes));
+  forumStore.saveReadingNotes(state.notes);
 }
 
 function getBoard(id) {
@@ -394,8 +443,8 @@ function renderBoards() {
           : state.threads.filter((thread) => thread.board === board.id).length;
       return `
         <button class="board-button ${state.board === board.id ? "is-active" : ""}" type="button" data-board="${board.id}">
-          <span class="board-name">${board.name}<span>${total}</span></span>
-          <span class="board-meta">${board.countLabel} · ${board.desc}</span>
+          <span class="board-name">${escapeHTML(board.name)}<span>${total}</span></span>
+          <span class="board-meta">${escapeHTML(board.countLabel)} · ${escapeHTML(board.desc)}</span>
         </button>
       `;
     })
@@ -403,7 +452,7 @@ function renderBoards() {
 
   boardSelect.innerHTML = boards
     .filter((board) => board.id !== "all")
-    .map((board) => `<option value="${board.id}">${board.name}</option>`)
+    .map((board) => `<option value="${escapeHTML(board.id)}">${escapeHTML(board.name)}</option>`)
     .join("");
 }
 
@@ -413,8 +462,8 @@ function renderBooks() {
       ([id, title, meta]) => `
         <li>
           <button class="book-button" type="button" data-work="${id}">
-            <span class="book-title">${title}</span>
-            <span class="book-meta">${meta}</span>
+            <span class="book-title">${escapeHTML(title)}</span>
+            <span class="book-meta">${escapeHTML(meta)}</span>
           </button>
         </li>
       `,
@@ -424,7 +473,7 @@ function renderBooks() {
 
 function renderDigest() {
   document.querySelector("#digestList").innerHTML = digest
-    .map(([title, text]) => `<div class="digest-item"><strong>${title}</strong><p>${text}</p></div>`)
+    .map(([title, text]) => `<div class="digest-item"><strong>${escapeHTML(title)}</strong><p>${escapeHTML(text)}</p></div>`)
     .join("");
 }
 
@@ -443,17 +492,17 @@ function renderThreads() {
   threadList.innerHTML = visible
     .map(
       (thread) => `
-        <button class="thread-row" type="button" data-thread="${thread.id}">
+        <button class="thread-row" type="button" data-thread="${escapeHTML(thread.id)}">
           <span>
             <span class="thread-title">
               ${thread.pinned ? '<span class="pin">置顶</span>' : ""}
-              ${thread.title}
+              ${escapeHTML(thread.title)}
             </span>
-            <span class="thread-meta">${getBoard(thread.board).name} · ${thread.author} · <span class="tag">${thread.tag}</span></span>
+            <span class="thread-meta">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.author)} · <span class="tag">${escapeHTML(thread.tag)}</span></span>
           </span>
           <span class="thread-cell"><strong>${thread.replies.length}</strong>回复</span>
           <span class="thread-cell"><strong>${thread.views}</strong>浏览</span>
-          <span class="thread-cell"><strong>${thread.updated}</strong>最近回复</span>
+          <span class="thread-cell"><strong>${escapeHTML(thread.updated)}</strong>最近回复</span>
         </button>
       `,
     )
@@ -484,8 +533,8 @@ function renderReadingNotes() {
     .map(
       (note) => `
         <article class="note-card">
-          <span class="note-meta">${note.title} · ${note.time}</span>
-          <p>${note.body}</p>
+          <span class="note-meta">${escapeHTML(note.title)} · ${escapeHTML(note.time)}</span>
+          <p>${escapeHTML(note.body)}</p>
         </article>
       `,
     )
@@ -504,16 +553,16 @@ function renderReading() {
   document.querySelector("#readingZh").textContent = passage.zh;
 
   passageSelect.innerHTML = passages
-    .map((item, index) => `<option value="${index}">${item.label}</option>`)
+    .map((item, index) => `<option value="${index}">${escapeHTML(item.label)}</option>`)
     .join("");
   passageSelect.value = String(state.readingPassage);
 
   termList.innerHTML = (extra?.terms || [])
     .map(
       ([term, note]) => `
-        <button class="term-button" type="button" data-term="${term}" data-term-note="${note}">
-          <strong>${term}</strong>
-          <span>${note}</span>
+        <button class="term-button" type="button" data-term="${escapeHTML(term)}" data-term-note="${escapeHTML(note)}">
+          <strong>${escapeHTML(term)}</strong>
+          <span>${escapeHTML(note)}</span>
         </button>
       `,
     )
@@ -545,9 +594,9 @@ function renderWorkPage() {
   workIndexList.innerHTML = books
     .map(
       ([id, title, meta]) => `
-        <button class="${state.work === id ? "is-active" : ""}" type="button" data-work="${id}">
-          <strong>${title}</strong>
-          <span>${meta}</span>
+        <button class="${state.work === id ? "is-active" : ""}" type="button" data-work="${escapeHTML(id)}">
+          <strong>${escapeHTML(title)}</strong>
+          <span>${escapeHTML(meta)}</span>
         </button>
       `,
     )
@@ -556,25 +605,25 @@ function renderWorkPage() {
   workMain.innerHTML = `
     <header>
       <p class="eyebrow">Text Archive</p>
-      <h1>${work.title}</h1>
-      <p class="work-subtitle">${work.subtitle}</p>
+      <h1>${escapeHTML(work.title)}</h1>
+      <p class="work-subtitle">${escapeHTML(work.subtitle)}</p>
     </header>
 
     <div class="work-facts">
-      <div class="work-fact"><span>Date</span><strong>${work.date}</strong></div>
-      <div class="work-fact"><span>Category</span><strong>${work.category}</strong></div>
-      <div class="work-fact"><span>Status</span><strong>${work.status}</strong></div>
-      <div class="work-fact"><span>Forum</span><strong>${getBoard(work.board).name}</strong></div>
+      <div class="work-fact"><span>Date</span><strong>${escapeHTML(work.date)}</strong></div>
+      <div class="work-fact"><span>Category</span><strong>${escapeHTML(work.category)}</strong></div>
+      <div class="work-fact"><span>Status</span><strong>${escapeHTML(work.status)}</strong></div>
+      <div class="work-fact"><span>Forum</span><strong>${escapeHTML(getBoard(work.board).name)}</strong></div>
     </div>
 
     <section class="work-section" id="work-overview">
       <h2>About This Text</h2>
-      <p>${work.intro}</p>
+      <p>${escapeHTML(work.intro)}</p>
     </section>
 
     <section class="work-section">
       <h2>Editorial Note</h2>
-      <p>${work.overview}</p>
+      <p>${escapeHTML(work.overview)}</p>
     </section>
 
     <section class="work-section" id="work-texts">
@@ -582,11 +631,11 @@ function renderWorkPage() {
       <div class="resource-grid">
         <div class="resource-list">
           <span>Primary Texts</span>
-          <ul>${work.resources.texts.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <ul>${work.resources.texts.map((item) => `<li>${escapeHTML(item)}</li>`).join("")}</ul>
         </div>
         <div class="resource-list">
           <span>Commentary</span>
-          <ul>${work.resources.commentary.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <ul>${work.resources.commentary.map((item) => `<li>${escapeHTML(item)}</li>`).join("")}</ul>
         </div>
       </div>
     </section>
@@ -596,11 +645,11 @@ function renderWorkPage() {
       <div class="parallel-sample">
         <div>
           <h3>English</h3>
-          <p>${work.sampleEn}</p>
+          <p>${escapeHTML(work.sampleEn)}</p>
         </div>
         <div>
           <h3>中文译稿</h3>
-          <p>${work.sampleZh}</p>
+          <p>${escapeHTML(work.sampleZh)}</p>
         </div>
       </div>
     </section>
@@ -609,8 +658,8 @@ function renderWorkPage() {
       <h2>Forum Discussion</h2>
       <p>Use the forum thread for source notes, translation proposals, corrections, and reading questions. 每条讨论都应尽量附上版本、页码或段落编号。</p>
       <div class="work-actions">
-        <button class="primary-button" type="button" data-work-discuss="${work.board}">查看相关版块</button>
-        <button class="secondary-button" type="button" data-work-quote="${state.work}">引用样例发帖</button>
+        <button class="primary-button" type="button" data-work-discuss="${escapeHTML(work.board)}">查看相关版块</button>
+        <button class="secondary-button" type="button" data-work-quote="${escapeHTML(state.work)}">引用样例发帖</button>
       </div>
     </section>
   `;
@@ -632,24 +681,24 @@ function openThread(id, incrementView = true) {
   renderThreads();
 
   threadDetail.innerHTML = `
-    <p class="eyebrow">${getBoard(thread.board).name} · ${thread.tag}</p>
-    <h2>${thread.title}</h2>
-    <p class="thread-meta">${thread.author} · ${thread.updated} · ${thread.views} 浏览</p>
-    <p class="thread-body">${thread.body}</p>
+    <p class="eyebrow">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.tag)}</p>
+    <h2>${escapeHTML(thread.title)}</h2>
+    <p class="thread-meta">${escapeHTML(thread.author)} · ${escapeHTML(thread.updated)} · ${thread.views} 浏览</p>
+    <p class="thread-body">${escapeHTML(thread.body)}</p>
     <h3>回复</h3>
     <div class="reply-list">
       ${thread.replies
         .map(
           (reply, index) => `
             <article class="reply-card">
-              <span class="reply-meta">#${index + 1} · ${reply.author} · ${reply.time}</span>
-              <p>${reply.body}</p>
+              <span class="reply-meta">#${index + 1} · ${escapeHTML(reply.author)} · ${escapeHTML(reply.time)}</span>
+              <p>${escapeHTML(reply.body)}</p>
             </article>
           `,
         )
         .join("")}
     </div>
-    <form class="reply-form" data-reply-thread="${thread.id}">
+    <form class="reply-form" data-reply-thread="${escapeHTML(thread.id)}">
       <textarea required rows="4" placeholder="补充来源、译法或阅读意见"></textarea>
       <button class="primary-button" type="submit">回复</button>
     </form>
@@ -667,7 +716,7 @@ function openComposer(prefill = "") {
 
 function createThread(formData) {
   const thread = {
-    id: `thread-${Date.now()}`,
+    id: makeId("thread"),
     board: formData.get("board"),
     title: formData.get("title").trim(),
     author: "Sunmaker",
@@ -767,19 +816,19 @@ passageSelect.addEventListener("change", (event) => {
 
 document.querySelector("#decreaseReaderFont").addEventListener("click", () => {
   state.readerFont = Math.max(0.88, Number((state.readerFont - 0.08).toFixed(2)));
-  localStorage.setItem("arcana-reader-font", String(state.readerFont));
+  forumStore.savePreference("reader-font", String(state.readerFont));
   renderReading();
 });
 
 document.querySelector("#increaseReaderFont").addEventListener("click", () => {
   state.readerFont = Math.min(1.32, Number((state.readerFont + 0.08).toFixed(2)));
-  localStorage.setItem("arcana-reader-font", String(state.readerFont));
+  forumStore.savePreference("reader-font", String(state.readerFont));
   renderReading();
 });
 
 document.querySelector("#toggleReaderLayout").addEventListener("click", () => {
   state.readerLayout = state.readerLayout === "stacked" ? "parallel" : "stacked";
-  localStorage.setItem("arcana-reader-layout", state.readerLayout);
+  forumStore.savePreference("reader-layout", state.readerLayout);
   renderReading();
 });
 
@@ -850,10 +899,10 @@ workPage.addEventListener("click", (event) => {
 
 document.querySelector("#themeToggle").addEventListener("click", () => {
   document.body.classList.toggle("dark");
-  localStorage.setItem("arcana-theme", document.body.classList.contains("dark") ? "dark" : "light");
+  forumStore.savePreference("theme", document.body.classList.contains("dark") ? "dark" : "light");
 });
 
-if (localStorage.getItem("arcana-theme") === "dark") {
+if (forumStore.loadPreference("theme", "light") === "dark") {
   document.body.classList.add("dark");
 }
 
