@@ -660,15 +660,29 @@ a {
   position: static;
 }
 
+.reader-entry {
+  padding: 12px;
+}
+
+.reader-entry-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 54px;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+}
+
+.reader-entry-button span {
+  color: color-mix(in srgb, #fff 78%, var(--accent-strong));
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .reader-panel .section-title {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
-}
-
-.reader-entry-copy {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.7;
 }
 
 .reader-art {
