@@ -22,6 +22,9 @@ Arcana Commons is a forum prototype for public-domain texts, occult studies, bil
 - Added a corner scripture slogan:
   "Son of man, eat what you find; eat this scroll, and go, speak to the house of Israel. — Ezekiel 3:1"
 
+- 已擴充術語索引：側邊術語卡納入 Digital Occult Library 詞表的整理摘要。
+- Expanded the terminology index: sidebar term cards now include summarized entries from the Digital Occult Library glossary.
+
 ## 功能概覽 / Features
 
 - 論壇分區：公版文本、平行文本、研究札記、站務與共建。
@@ -39,8 +42,8 @@ Arcana Commons is a forum prototype for public-domain texts, occult studies, bil
 - 閱讀二級界面：首頁只保留閱讀入口，完整閱讀工作台進入專門界面，避免資訊堆疊。
 - Dedicated reader page: the full reading workspace opens in a focused secondary interface.
 
-- 側邊術語卡：首頁側邊欄保留可隨機刷新的研究術語卡。
-- Sidebar term card: the home sidebar keeps a refreshable research term card.
+- 側邊術語卡：首頁側邊欄保留可隨機刷新的研究術語卡，並納入外部詞表摘要來源。
+- Sidebar term card: the home sidebar keeps a refreshable research term card with summarized external glossary references.
 
 - 公版書庫：提供文本檔案入口，並展示年代、類別、狀態、資源與討論入口。
 - Public-domain library: archive entries with date, category, status, resources, and discussion links.

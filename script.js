@@ -486,6 +486,33 @@ const readingEnhancements = {
   },
 };
 
+const glossarySourceTerms = [
+  ["Occult", "隐秘知识与实践的总称；常涵盖占星、炼金术、卡巴拉、仪式魔法、神秘主义和相关秘传传统。"],
+  ["Esoteric / Esotericism", "只为少数人理解或传授的知识体系；常带有宗教、灵性或哲学色彩。"],
+  ["Mysticism", "以直接经验神圣者或终极实在为目标的宗教实践与思想传统。"],
+  ["Theology", "从信仰者或体系内部立场研究神、宗教、宇宙生成、灵魂和来世等问题。"],
+  ["Alchemy", "炼金术；既指物质转化的早期实验传统，也常被解释为灵魂或存在状态的完善过程。"],
+  ["Theurgy", "神术；通过仪式、圣名、咒语、净化、符印或器物与神灵/灵体互动以求效果。"],
+  ["Astrology", "占星术；以星体位置和运动解释人格、事件或未来趋势的象征系统。"],
+  ["Hermeticism", "赫尔墨斯主义；围绕 Hermes Trismegistus 名下文本与哲学形成的秘传思想传统。"],
+  ["Kabbalah / Cabala / Qabalah", "卡巴拉及其拼写变体；源自犹太神秘主义并被不同传统重新阐释的秘传体系。"],
+  ["Sigil", "符印；为意图、召请、信息或目的而设计并赋予效力的图像。"],
+  ["Grimoire", "魔法书；收录咒语、仪式、召请或相关操作文本的专门书籍。"],
+  ["Abraxas", "阿布拉克萨斯；见于诺斯替护符与宝石上的神秘名号，其身份与含义存在争议。"],
+  ["Demiurge", "造物匠；柏拉图、 neoplatonic 与诺斯替宇宙论中的第二因或物质世界塑造者。"],
+  ["Manuscript", "手稿；写在纸、羊皮纸、纸草等材料上的手写文本，可成册也可为散页。"],
+  ["Source Text / Primary Source", "原始文本或一手材料；后续解释、注释、传统或研究所依据的基础材料。"],
+  ["Ontology", "本体论；讨论存在之为存在，追问事物为何、如何以及是什么。"],
+  ["Metaphysics", "形而上学；研究现实、存在、不可见秩序及其原因的哲学领域。"],
+  ["Semiotics", "符号学；研究符号、意义生成、沟通结构以及符号之间关系的学科。"],
+  ["Hermeneutics", "诠释学；文本解释的方法与理论，常用于圣经、文学和哲学文本。"],
+  ["Cult", "崇拜团体/边缘宗教团体；通常围绕非主流信念和强势领袖形成，定义带有争议性。"],
+  ["Ein-Sof", "无限者；卡巴拉中尚未进入形式化显现之前的神。"],
+  ["Sefirot", "十个流溢/质点；卡巴拉生命树中由 Ein-Sof 流出的基本结构。"],
+  ["Wicca", "威卡；现代巫术/新异教传统，常强调自然、女神形象和仪式实践。"],
+  ["Satanism", "撒旦主义；既可指无神论式反宗教运动，也可指以撒旦/魔鬼为崇拜对象的实践。"],
+];
+
 const books = [
   ["golden-bough", "The Golden Bough", "比较神话 · 英文公版"],
   ["secret-teachings", "The Secret Teachings of All Ages", "需核验版本 · 书目待定"],
@@ -759,7 +786,7 @@ function getCurrentPassage() {
 }
 
 function getSideTerms() {
-  return Object.entries(readingEnhancements).flatMap(([readingId, enhancement]) =>
+  const readingTerms = Object.entries(readingEnhancements).flatMap(([readingId, enhancement]) =>
     (enhancement.terms || []).map(([term, note]) => ({
       readingId,
       readingTitle: readings[readingId].title,
@@ -767,6 +794,15 @@ function getSideTerms() {
       note,
     })),
   );
+
+  const sourceTerms = glossarySourceTerms.map(([term, note]) => ({
+    readingId: "digital-occult-library",
+    readingTitle: "Digital Occult Library · Glossary",
+    term,
+    note,
+  }));
+
+  return [...readingTerms, ...sourceTerms];
 }
 
 function renderSideTerm() {
