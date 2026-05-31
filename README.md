@@ -1,87 +1,109 @@
 # Arcana Commons Forum
 
-中文 / English
+繁體中文 / English
 
-Arcana Commons 是一个面向公版文本、神秘学研究、中英对照阅读、来源核验与学术讨论的静态论坛原型。项目现在已经加入 Convex 后端接入层，可以在配置后把主题、回复、浏览数与阅读笔记保存到 Convex；未配置 Convex 时会自动回退到浏览器 `localStorage`。
+Arcana Commons 是一個面向公版文本、神祕學研究、中英對照閱讀、來源核驗與學術討論的論壇原型。前端可部署到 Cloudflare Pages，以取得跨國 CDN 訪問能力；後端使用 Convex 儲存共享論壇資料。未配置 Convex 時，網站仍可運行，但資料會回退到瀏覽器本機的 `localStorage`。
 
-Arcana Commons is a static forum prototype for public-domain texts, occult studies, bilingual reading, source verification, and scholarly discussion. The project now includes a Convex backend integration layer. When configured, threads, replies, view counts, and reading notes are stored in Convex; without Convex configuration, the app falls back to browser `localStorage`.
+Arcana Commons is a forum prototype for public-domain texts, occult studies, bilingual reading, source verification, and scholarly discussion. The frontend can be deployed on Cloudflare Pages for global CDN access, while Convex stores shared forum data. Without Convex configuration, the site still runs, but data falls back to browser `localStorage`.
 
-## 功能概览 / Features
+## 最新更新 / Latest Updates
 
-- 论坛分区：公版文本、中英对照、研究札记、站务与共建。
+- 已加入 Cloudflare Pages 部署流程：`npm run build` 會輸出 `dist/`。
+- Added Cloudflare Pages deployment flow: `npm run build` outputs `dist/`.
+
+- 已加入 Convex 後端接入：主題、回覆、瀏覽數與閱讀筆記可寫入 Convex。
+- Added Convex backend integration: threads, replies, view counts, and reading notes can be stored in Convex.
+
+- 已加入專業多標籤體系：每個主題可有多個 `tags`，並按研究分類標註。
+- Added a professional multi-tag system: each thread can have multiple `tags` grouped by research categories.
+
+- 已加入角落題銘：
+  「人子啊，要吃你所得的；要吃這書卷，去對以色列家講說。——《以西結書》3:1」
+- Added a corner scripture slogan:
+  "Son of man, eat what you find; eat this scroll, and go, speak to the house of Israel. — Ezekiel 3:1"
+
+## 功能概覽 / Features
+
+- 論壇分區：公版文本、中英對照、研究札記、站務與共建。
 - Forum boards: public-domain texts, bilingual reading, research notes, and site operations.
 
-- 主题索引：支持版块筛选、关键词搜索、回复数/浏览数/最近活动排序。
+- 主題索引：支援版塊篩選、關鍵詞搜尋、回覆數/瀏覽數/最近活動排序。
 - Thread index: board filtering, keyword search, and sorting by replies, views, or recent activity.
 
-- 主题详情：弹窗查看正文、标签、作者、回复与回复表单。
+- 主題詳情：彈窗查看正文、標籤、作者、回覆與回覆表單。
 - Thread detail view: modal display for body, tags, author, replies, and reply form.
 
-- 中英对照阅读：支持段落切换、字号调整、双栏/单栏切换、术语卡和引用发帖。
+- 中英對照閱讀：支援段落切換、字號調整、雙欄/單欄切換、術語卡和引用發帖。
 - Bilingual reader: passage switching, font-size controls, parallel/single-column layouts, glossary cards, and quote-to-thread actions.
 
-- 公版书库：提供文本档案入口，并展示年代、类别、状态、资源与讨论入口。
+- 公版書庫：提供文本檔案入口，並展示年代、類別、狀態、資源與討論入口。
 - Public-domain library: archive entries with date, category, status, resources, and discussion links.
 
-- 阅读笔记：按阅读文本和段落保存笔记。
+- 閱讀筆記：按閱讀文本和段落保存筆記。
 - Reading notes: notes are saved by reading text and passage.
 
-- Convex 后端：可保存主题、回复、阅读笔记与浏览数。
+- Convex 後端：可保存主題、回覆、閱讀筆記與瀏覽數。
 - Convex backend: stores threads, replies, reading notes, and view counts.
 
-- 专业标签体系：主题支持多标签，并按 period、language、tradition、topic、source-type 分类。
-- Professional tag system: threads support multiple tags categorized by period, language, tradition, topic, and source-type.
+- 專業標籤體系：主題支援多標籤，並按 `period`、`language`、`tradition`、`topic`、`source-type` 分類。
+- Professional tag system: threads support multiple tags categorized by `period`, `language`, `tradition`, `topic`, and `source-type`.
 
-## 技术栈 / Tech Stack
+## 技術棧 / Tech Stack
 
 - 前端：原生 HTML、CSS、JavaScript。
 - Frontend: plain HTML, CSS, and JavaScript.
 
-- 后端：Convex。
+- 全球前端部署：Cloudflare Pages。
+- Global frontend deployment: Cloudflare Pages.
+
+- 後端：Convex。
 - Backend: Convex.
 
-- 本地回退：`localStorage`。
+- 本機回退：`localStorage`。
 - Local fallback: `localStorage`.
 
-## 文件结构 / File Structure
+## 檔案結構 / File Structure
 
 ```text
 .
 ├── index.html
 ├── styles.css
 ├── script.js
+├── config.js
 ├── config.example.js
 ├── convex/
 │   ├── schema.js
 │   ├── forum.js
 │   └── _generated/
+├── scripts/
+│   └── build-static.mjs
 ├── package.json
 ├── package-lock.json
 ├── CONVEX_INTEGRATION.md
 └── README.md
 ```
 
-- `index.html`：页面结构、导航、弹窗与文本档案容器。
-- `index.html`: page structure, navigation, modals, and archive containers.
+- `index.html`：頁面結構、導覽、彈窗、題銘與文本檔案容器。
+- `index.html`: page structure, navigation, modals, slogan, and archive containers.
 
-- `styles.css`：布局、主题、响应式样式与阅读/档案页面视觉。
-- `styles.css`: layout, themes, responsive styling, and reader/archive visuals.
+- `styles.css`：版面、主題、響應式樣式、標籤 chips、閱讀/檔案頁視覺。
+- `styles.css`: layout, themes, responsive styling, tag chips, and reader/archive visuals.
 
-- `script.js`：论坛渲染、搜索排序、阅读器交互、发帖回复、Convex/本地存储切换。
-- `script.js`: forum rendering, search and sorting, reader interactions, posting/replying, and Convex/local persistence switching.
+- `script.js`：論壇渲染、搜尋排序、閱讀器互動、發帖回覆、多標籤、Convex/本機儲存切換。
+- `script.js`: forum rendering, search and sorting, reader interactions, posting/replying, multi-tags, and Convex/local persistence switching.
 
-- `convex/schema.js`：Convex 数据表定义。
+- `scripts/build-static.mjs`：Cloudflare Pages 靜態構建腳本，輸出 `dist/`。
+- `scripts/build-static.mjs`: static build script for Cloudflare Pages, outputting `dist/`.
+
+- `convex/schema.js`：Convex 資料表定義。
 - `convex/schema.js`: Convex table schema.
 
-- `convex/forum.js`：Convex 查询与 mutation 函数。
+- `convex/forum.js`：Convex 查詢與 mutation 函數。
 - `convex/forum.js`: Convex queries and mutations.
 
-- `config.example.js`：Convex URL 配置示例。
-- `config.example.js`: example Convex URL configuration.
+## 本機運行 / Local Usage
 
-## 本地运行 / Local Usage
-
-安装依赖：
+安裝依賴：
 
 Install dependencies:
 
@@ -89,15 +111,15 @@ Install dependencies:
 npm install
 ```
 
-启动 Convex：
+啟動 Convex 本機開發環境：
 
-Start Convex:
+Start local Convex development:
 
 ```bash
 npx convex dev
 ```
 
-复制示例配置：
+複製示例配置：
 
 Copy the example config:
 
@@ -105,56 +127,44 @@ Copy the example config:
 cp config.example.js config.js
 ```
 
-然后把 `config.js` 中的地址改成你的 Convex 部署地址：
+將 `config.js` 中的地址改成你的 Convex 部署地址：
 
-Then update `config.js` with your Convex deployment URL:
+Update `config.js` with your Convex deployment URL:
 
 ```js
 window.CONVEX_URL = "https://your-deployment.convex.cloud";
 ```
 
-如果使用本地 Convex 开发环境，也可以填入：
+本機 Convex 開發也可使用：
 
-For local Convex development, you can use:
+For local Convex development:
 
 ```js
 window.CONVEX_URL = "http://127.0.0.1:3210";
 ```
 
-最后直接用浏览器打开 `index.html`，或通过任意静态文件服务器预览。
+最後直接用瀏覽器打開 `index.html`，或透過任何靜態檔案伺服器預覽。
 
 Finally, open `index.html` directly in a browser or serve the folder with any static file server.
 
 ## Cloudflare Pages 部署 / Cloudflare Pages Deployment
 
-推荐部署方式：
+推薦在 Cloudflare Pages 後台使用 **Connect to Git** 連接此 GitHub 倉庫。
 
-Recommended deployment:
+Use **Connect to Git** in Cloudflare Pages to connect this GitHub repository.
 
-1. 在 Cloudflare Pages 后台选择 **Connect to Git**。
-2. In Cloudflare Pages, choose **Connect to Git**.
+設定：
 
-3. 选择 GitHub 仓库 `Hamforach/website`。
-4. Select the GitHub repository `Hamforach/website`.
-
-5. Framework preset 选择 `None`。
-6. Set framework preset to `None`.
-
-7. Build command 填写：
-8. Use this build command:
-
-```bash
-npm run build
-```
-
-9. Build output directory 填写：
-10. Use this build output directory:
+Settings:
 
 ```text
-dist
+Repository: Hamforach/website
+Framework preset: None
+Build command: npm run build
+Build output directory: dist
 ```
 
-如果要让线上论坛共享数据，请在 Cloudflare Pages 的环境变量里加入：
+若要讓線上論壇共享資料，請在 Cloudflare Pages 的環境變數中加入：
 
 To make the online forum share data, add this environment variable in Cloudflare Pages:
 
@@ -162,32 +172,47 @@ To make the online forum share data, add this environment variable in Cloudflare
 CONVEX_URL=https://your-production-deployment.convex.cloud
 ```
 
-构建脚本会把 `CONVEX_URL` 写入线上 `dist/config.js`。如果没有设置该环境变量，网站仍会运行，但每个访问者的数据只会保存在自己的浏览器 `localStorage` 中。
+構建腳本會把 `CONVEX_URL` 寫入線上 `dist/config.js`。如果沒有設定該環境變數，網站仍會載入，但訪客資料只會存在各自瀏覽器的 `localStorage`。
 
-The build script writes `CONVEX_URL` into the deployed `dist/config.js`. If the variable is not set, the site still runs, but each visitor's data is stored only in their own browser `localStorage`.
+The build script writes `CONVEX_URL` into the deployed `dist/config.js`. If the variable is not set, the site still loads, but visitor data remains in each user's browser `localStorage`.
 
-## 数据保存 / Persistence
+## Convex 後端 / Convex Backend
 
-配置 Convex 后：
+部署生產後端：
+
+Deploy production backend:
+
+```bash
+npx convex login
+npx convex deploy
+```
+
+部署完成後，把生產 `CONVEX_URL` 填入 Cloudflare Pages 的環境變數。
+
+After deployment, place the production `CONVEX_URL` in Cloudflare Pages environment variables.
+
+## 資料保存 / Persistence
+
+配置 Convex 後：
 
 When Convex is configured:
 
-- 主题保存到 `threads` 表。
+- 主題保存到 `threads` 表。
 - Threads are saved to the `threads` table.
 
-- 回复保存到 `replies` 表。
+- 回覆保存到 `replies` 表。
 - Replies are saved to the `replies` table.
 
-- 阅读笔记保存到 `readingNotes` 表。
+- 閱讀筆記保存到 `readingNotes` 表。
 - Reading notes are saved to the `readingNotes` table.
 
-- 浏览数通过 Convex mutation 更新。
+- 瀏覽數透過 Convex mutation 更新。
 - View counts are updated through a Convex mutation.
 
-- 主题标签以 `tags` 数组保存，每个标签包含 `name` 和 `category`。
+- 主題標籤以 `tags` 陣列保存，每個標籤包含 `name` 與 `category`。
 - Thread tags are stored as a `tags` array, where each tag has a `name` and `category`.
 
-标签分类：
+標籤分類：
 
 Tag categories:
 
@@ -199,29 +224,29 @@ topic        translation, commentary, source-check
 source-type  public-domain, uncertain-source, needs-verification
 ```
 
-未配置 Convex 或连接失败时：
+未配置 Convex 或連線失敗時：
 
 When Convex is not configured or unavailable:
 
-- 应用会自动回退到浏览器 `localStorage`。
+- 應用會自動回退到瀏覽器 `localStorage`。
 - The app automatically falls back to browser `localStorage`.
 
-## 后续计划 / Roadmap
+## 後續計畫 / Roadmap
 
-- 增加正式路由，用于版块页与文本档案页。
+- 增加正式路由，用於版塊頁與文本檔案頁。
 - Add real routing for board pages and archive pages.
 
-- 增加账号系统与作者身份。
+- 增加帳號系統與作者身份。
 - Add accounts and author identity.
 
-- 增加管理与审核权限。
+- 增加管理與審核權限。
 - Add moderation and admin permissions.
 
-- 将静态书库数据迁移为可编辑数据。
+- 將靜態書庫資料遷移為可編輯資料。
 - Move static library/archive data into editable backend data.
 
-- 增加来源字段：版权状态、版本、页码、URL。
+- 增加來源欄位：版權狀態、版本、頁碼、URL。
 - Add source metadata: copyright status, edition, page, and URL.
 
-- 增加段落级中英对齐与术语表链接。
+- 增加段落級中英對齊與術語表連結。
 - Add paragraph-level bilingual alignment and glossary linking.
