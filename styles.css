@@ -291,6 +291,7 @@ a {
 }
 
 .forum-shell,
+.reader-entry,
 .reader-panel,
 .work-page,
 .library-card,
@@ -304,6 +305,7 @@ a {
 }
 
 .forum-shell,
+.reader-entry,
 .reader-panel,
 .work-page {
   border-radius: 8px;
@@ -317,6 +319,11 @@ a {
 .work-page {
   grid-column: 1 / -1;
   padding: 18px;
+}
+
+.reader-page {
+  grid-column: 1 / -1;
+  position: static;
 }
 
 .notice-strip {
@@ -640,6 +647,7 @@ a {
   font-size: 16px;
 }
 
+.reader-entry,
 .reader-panel {
   position: sticky;
   top: 96px;
@@ -648,9 +656,19 @@ a {
   padding: 18px;
 }
 
+.reader-page {
+  position: static;
+}
+
 .reader-panel .section-title {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
+}
+
+.reader-entry-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .reader-art {
@@ -1265,6 +1283,7 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .reader-entry,
   .reader-panel {
     position: static;
   }
@@ -1321,6 +1340,7 @@ a {
   }
 
   .forum-shell,
+  .reader-entry,
   .reader-panel,
   .thread-panel {
     padding: 12px;

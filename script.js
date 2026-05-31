@@ -598,6 +598,9 @@ const threadCount = document.querySelector("#threadCount");
 const replyCount = document.querySelector("#replyCount");
 const searchInput = document.querySelector("#searchInput");
 const sortSelect = document.querySelector("#sortSelect");
+const forumShell = document.querySelector("#forums");
+const readerEntry = document.querySelector(".reader-entry");
+const readerPage = document.querySelector("#readerPage");
 const threadDialog = document.querySelector("#threadDialog");
 const threadDetail = document.querySelector("#threadDetail");
 const composerDialog = document.querySelector("#composerDialog");
@@ -904,8 +907,28 @@ function renderWorkPage() {
 function openWork(id) {
   state.work = workPages[id] ? id : "golden-bough";
   renderWorkPage();
+  forumShell.hidden = true;
+  readerEntry.hidden = true;
+  readerPage.hidden = true;
   workPage.hidden = false;
   workPage.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function openReaderPage() {
+  forumShell.hidden = true;
+  readerEntry.hidden = true;
+  workPage.hidden = true;
+  readerPage.hidden = false;
+  renderReading();
+  renderDigest();
+  readerPage.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function closeReaderPage() {
+  readerPage.hidden = true;
+  forumShell.hidden = false;
+  readerEntry.hidden = false;
+  forumShell.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function openThread(id, incrementView = true) {
@@ -1025,9 +1048,13 @@ document.querySelector("#openComposer").addEventListener("click", () => openComp
 document.querySelector("#closeComposer").addEventListener("click", () => composerDialog.close());
 document.querySelector("#cancelComposer").addEventListener("click", () => composerDialog.close());
 document.querySelector("#closeThread").addEventListener("click", () => threadDialog.close());
+document.querySelector("#openReaderPage").addEventListener("click", openReaderPage);
+document.querySelector("#closeReaderPage").addEventListener("click", closeReaderPage);
 boardSelect.addEventListener("change", () => selectDefaultTagsForBoard(boardSelect.value));
 document.querySelector("#closeWorkPage").addEventListener("click", () => {
   workPage.hidden = true;
+  forumShell.hidden = false;
+  readerEntry.hidden = false;
   document.querySelector("#forums").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
