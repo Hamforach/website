@@ -47,6 +47,27 @@ const convexRuntime = {
   unsubscribers: [],
 };
 
+const CONVEX_SDK_URL = "https://unpkg.com/convex@1.39.1/dist/browser.bundle.js";
+let convexSdkPromise = null;
+
+function loadConvexSdk() {
+  if (!APP_CONFIG.convexUrl) return Promise.resolve(false);
+  if (globalThis.convex?.ConvexClient && globalThis.convex?.anyApi) return Promise.resolve(true);
+
+  if (!convexSdkPromise) {
+    convexSdkPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = CONVEX_SDK_URL;
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error("Unable to load Convex browser SDK."));
+      document.head.append(script);
+    });
+  }
+
+  return convexSdkPromise;
+}
+
 function getConvexRuntime() {
   if (!APP_CONFIG.convexUrl || !globalThis.convex?.ConvexClient || !globalThis.convex?.anyApi) {
     return null;
@@ -60,15 +81,20 @@ function getConvexRuntime() {
   return convexRuntime;
 }
 
+async function ensureConvexRuntime() {
+  await loadConvexSdk();
+  return getConvexRuntime();
+}
+
 const forumStore = {
   isRemote() {
     return APP_CONFIG.persistence === "convex" && Boolean(getConvexRuntime());
   },
-  startRemoteSync({ onThreads, onReadingNotes, onError }) {
-    const runtime = getConvexRuntime();
-    if (!runtime) return false;
-
+  async startRemoteSync({ onThreads, onReadingNotes, onError }) {
     try {
+      const runtime = await ensureConvexRuntime();
+      if (!runtime) return false;
+
       runtime.unsubscribers.forEach((unsubscribe) => unsubscribe?.());
       runtime.unsubscribers = [
         runtime.client.onUpdate(runtime.api.forum.listThreads, {}, onThreads),
@@ -81,10 +107,10 @@ const forumStore = {
     }
   },
   async createThread(thread) {
-    const runtime = getConvexRuntime();
-    if (!runtime) return false;
-
     try {
+      const runtime = await ensureConvexRuntime();
+      if (!runtime) return false;
+
       await runtime.client.mutation(runtime.api.forum.createThread, {
         board: thread.board,
         title: thread.title,
@@ -100,10 +126,10 @@ const forumStore = {
     }
   },
   async addReply(threadId, reply) {
-    const runtime = getConvexRuntime();
-    if (!runtime) return false;
-
     try {
+      const runtime = await ensureConvexRuntime();
+      if (!runtime) return false;
+
       await runtime.client.mutation(runtime.api.forum.addReply, {
         threadId,
         author: reply.author,
@@ -116,10 +142,10 @@ const forumStore = {
     }
   },
   async incrementThreadViews(threadId) {
-    const runtime = getConvexRuntime();
-    if (!runtime) return false;
-
     try {
+      const runtime = await ensureConvexRuntime();
+      if (!runtime) return false;
+
       await runtime.client.mutation(runtime.api.forum.incrementThreadViews, { threadId });
       return true;
     } catch (error) {
@@ -128,10 +154,10 @@ const forumStore = {
     }
   },
   async saveReadingNote(note) {
-    const runtime = getConvexRuntime();
-    if (!runtime) return false;
-
     try {
+      const runtime = await ensureConvexRuntime();
+      if (!runtime) return false;
+
       await runtime.client.mutation(runtime.api.forum.saveReadingNote, {
         reading: note.reading,
         passage: note.passage,
