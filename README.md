@@ -29,6 +29,9 @@ Arcana Commons is a static forum prototype for public-domain texts, occult studi
 - Convex 后端：可保存主题、回复、阅读笔记与浏览数。
 - Convex backend: stores threads, replies, reading notes, and view counts.
 
+- 专业标签体系：主题支持多标签，并按 period、language、tradition、topic、source-type 分类。
+- Professional tag system: threads support multiple tags categorized by period, language, tradition, topic, and source-type.
+
 ## 技术栈 / Tech Stack
 
 - 前端：原生 HTML、CSS、JavaScript。
@@ -139,6 +142,21 @@ When Convex is configured:
 
 - 浏览数通过 Convex mutation 更新。
 - View counts are updated through a Convex mutation.
+
+- 主题标签以 `tags` 数组保存，每个标签包含 `name` 和 `category`。
+- Thread tags are stored as a `tags` array, where each tag has a `name` and `category`.
+
+标签分类：
+
+Tag categories:
+
+```text
+period       Antiquity, Late Antiquity, Renaissance
+language     Latin, Greek, Chinese, English
+tradition    Hermeticism, Neoplatonism, Gnosticism
+topic        translation, commentary, source-check
+source-type  public-domain, uncertain-source, needs-verification
+```
 
 未配置 Convex 或连接失败时：
 

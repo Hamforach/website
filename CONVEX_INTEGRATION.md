@@ -21,7 +21,10 @@ The first backend pass should move shared, multi-user data to Convex:
   - board
   - title
   - author
-  - tag
+  - tag (legacy single-tag compatibility)
+  - tags
+    - name
+    - category: period / language / tradition / topic / source-type
   - body
   - views
   - pinned
@@ -68,7 +71,24 @@ const forumStore = {
 };
 ```
 
-The thread, reply, view-count, and reading-note methods now call Convex when `window.CONVEX_URL` is configured. Preferences remain local.
+The thread, reply, view-count, reading-note, and multi-tag methods now call Convex when `window.CONVEX_URL` is configured. Preferences remain local.
+
+## Professional Tag System
+
+Threads now support a `tags` array instead of relying only on the legacy `tag` string. Each tag has:
+
+- `name`
+- `category`
+
+Supported categories:
+
+- `period`: Antiquity, Late Antiquity, Renaissance
+- `language`: Latin, Greek, Chinese, English
+- `tradition`: Hermeticism, Neoplatonism, Gnosticism
+- `topic`: translation, commentary, source-check
+- `source-type`: public-domain, uncertain-source, needs-verification
+
+The frontend keeps backward compatibility by deriving display tags from the old `tag` field when a thread has no `tags` array.
 
 ## Important Constraint
 

@@ -90,6 +90,7 @@ const forumStore = {
         title: thread.title,
         author: thread.author,
         tag: thread.tag,
+        tags: thread.tags,
         body: thread.body,
       });
       return true;
@@ -197,6 +198,94 @@ const boards = [
     countLabel: "站务",
   },
 ];
+
+const tagCategories = {
+  period: "Period",
+  language: "Language",
+  tradition: "Tradition",
+  topic: "Topic",
+  "source-type": "Source Type",
+};
+
+const tagCatalog = [
+  { name: "Latin", category: "language" },
+  { name: "Greek", category: "language" },
+  { name: "Chinese", category: "language" },
+  { name: "English", category: "language" },
+  { name: "translation", category: "topic" },
+  { name: "commentary", category: "topic" },
+  { name: "source-check", category: "topic" },
+  { name: "Hermeticism", category: "tradition" },
+  { name: "Neoplatonism", category: "tradition" },
+  { name: "Gnosticism", category: "tradition" },
+  { name: "Antiquity", category: "period" },
+  { name: "Late Antiquity", category: "period" },
+  { name: "Renaissance", category: "period" },
+  { name: "public-domain", category: "source-type" },
+  { name: "uncertain-source", category: "source-type" },
+  { name: "needs-verification", category: "source-type" },
+];
+
+const boardTagDefaults = {
+  texts: ["public-domain", "source-check"],
+  translation: ["translation", "needs-verification"],
+  practice: ["commentary"],
+  site: ["source-check"],
+};
+
+const threadTagPresets = {
+  "emerald-source": ["Latin", "English", "Hermeticism", "Late Antiquity", "source-check", "public-domain"],
+  "bilingual-reader": ["Chinese", "English", "translation", "Hermeticism", "needs-verification"],
+  "discuz-structure": ["source-check", "commentary"],
+  "golden-bough": ["English", "commentary", "Renaissance", "public-domain"],
+  "copyright-rules": ["source-check", "public-domain", "uncertain-source"],
+};
+
+function tagsFromNames(names) {
+  return names
+    .map((name) => tagCatalog.find((tag) => tag.name === name))
+    .filter(Boolean)
+    .map((tag) => ({ ...tag }));
+}
+
+function getThreadTags(thread) {
+  if (Array.isArray(thread.tags) && thread.tags.length) return thread.tags;
+  if (threadTagPresets[thread.id]) return tagsFromNames(threadTagPresets[thread.id]);
+  if (thread.tag) return [{ name: thread.tag, category: "topic" }];
+  return [];
+}
+
+function getDefaultTagsForBoard(board) {
+  return tagsFromNames(boardTagDefaults[board] || ["source-check"]);
+}
+
+function getSelectedTags(formData) {
+  const selected = formData.getAll("tagNames");
+  return selected.length ? tagsFromNames(selected) : getDefaultTagsForBoard(formData.get("board"));
+}
+
+function selectDefaultTagsForBoard(board) {
+  const defaults = new Set(getDefaultTagsForBoard(board).map((tag) => tag.name));
+  Array.from(tagSelect?.options || []).forEach((option) => {
+    option.selected = defaults.has(option.value);
+  });
+}
+
+function renderTagChips(thread) {
+  const tags = getThreadTags(thread);
+  if (!tags.length) return "";
+
+  return `<span class="tag-list">${tags
+    .map(
+      (tag) => `
+        <span class="tag-chip" data-category="${escapeHTML(tag.category)}" title="${escapeHTML(tagCategories[tag.category] || tag.category)}">
+          <small>${escapeHTML(tagCategories[tag.category] || tag.category)}</small>
+          ${escapeHTML(tag.name)}
+        </span>
+      `,
+    )
+    .join("")}</span>`;
+}
 
 const seedThreads = [
   {
@@ -488,6 +577,7 @@ const threadDetail = document.querySelector("#threadDetail");
 const composerDialog = document.querySelector("#composerDialog");
 const composerForm = document.querySelector("#composerForm");
 const boardSelect = composerForm.elements.board;
+const tagSelect = composerForm.elements.tagNames;
 const workPage = document.querySelector("#workPage");
 const workMain = document.querySelector("#workMain");
 const workLinks = document.querySelector("#workLinks");
@@ -522,7 +612,10 @@ function getVisibleThreads() {
   const query = state.search.trim().toLowerCase();
   let items = state.threads.filter((thread) => {
     const inBoard = state.board === "all" || thread.board === state.board;
-    const text = `${thread.title} ${thread.author} ${thread.tag} ${thread.body}`.toLowerCase();
+    const tagText = getThreadTags(thread)
+      .map((tag) => `${tag.name} ${tag.category}`)
+      .join(" ");
+    const text = `${thread.title} ${thread.author} ${thread.tag} ${tagText} ${thread.body}`.toLowerCase();
     return inBoard && (!query || text.includes(query));
   });
 
@@ -555,6 +648,20 @@ function renderBoards() {
   boardSelect.innerHTML = boards
     .filter((board) => board.id !== "all")
     .map((board) => `<option value="${escapeHTML(board.id)}">${escapeHTML(board.name)}</option>`)
+    .join("");
+}
+
+function renderTagOptions() {
+  if (!tagSelect) return;
+
+  tagSelect.innerHTML = Object.entries(tagCategories)
+    .map(([category, label]) => {
+      const options = tagCatalog
+        .filter((tag) => tag.category === category)
+        .map((tag) => `<option value="${escapeHTML(tag.name)}">${escapeHTML(tag.name)}</option>`)
+        .join("");
+      return `<optgroup label="${escapeHTML(label)}">${options}</optgroup>`;
+    })
     .join("");
 }
 
@@ -600,7 +707,8 @@ function renderThreads() {
               ${thread.pinned ? '<span class="pin">置顶</span>' : ""}
               ${escapeHTML(thread.title)}
             </span>
-            <span class="thread-meta">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.author)} · <span class="tag">${escapeHTML(thread.tag)}</span></span>
+            <span class="thread-meta">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.author)}</span>
+            ${renderTagChips(thread)}
           </span>
           <span class="thread-cell"><strong>${thread.replies.length}</strong>回复</span>
           <span class="thread-cell"><strong>${thread.views}</strong>浏览</span>
@@ -788,9 +896,10 @@ async function openThread(id, incrementView = true) {
   }
 
   threadDetail.innerHTML = `
-    <p class="eyebrow">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.tag)}</p>
+    <p class="eyebrow">${escapeHTML(getBoard(thread.board).name)}</p>
     <h2>${escapeHTML(thread.title)}</h2>
     <p class="thread-meta">${escapeHTML(thread.author)} · ${escapeHTML(thread.updated)} · ${thread.views} 浏览</p>
+    ${renderTagChips(thread)}
     <p class="thread-body">${escapeHTML(thread.body)}</p>
     <h3>回复</h3>
     <div class="reply-list">
@@ -817,17 +926,20 @@ async function openThread(id, incrementView = true) {
 function openComposer(prefill = "") {
   composerForm.reset();
   if (state.board !== "all") boardSelect.value = state.board;
+  selectDefaultTagsForBoard(boardSelect.value);
   composerForm.elements.body.value = prefill;
   composerDialog.showModal();
 }
 
 async function createThread(formData) {
+  const tags = getSelectedTags(formData);
   const thread = {
     id: makeId("thread"),
     board: formData.get("board"),
     title: formData.get("title").trim(),
     author: "Sunmaker",
-    tag: "新主题",
+    tag: tags[0]?.name || "新主题",
+    tags,
     body: formData.get("body").trim(),
     replies: [],
     views: 1,
@@ -848,6 +960,7 @@ async function createThread(formData) {
 
 function render() {
   renderBoards();
+  renderTagOptions();
   renderBooks();
   renderDigest();
   renderThreads();
@@ -886,6 +999,7 @@ document.querySelector("#openComposer").addEventListener("click", () => openComp
 document.querySelector("#closeComposer").addEventListener("click", () => composerDialog.close());
 document.querySelector("#cancelComposer").addEventListener("click", () => composerDialog.close());
 document.querySelector("#closeThread").addEventListener("click", () => threadDialog.close());
+boardSelect.addEventListener("change", () => selectDefaultTagsForBoard(boardSelect.value));
 document.querySelector("#closeWorkPage").addEventListener("click", () => {
   workPage.hidden = true;
   document.querySelector("#forums").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -955,6 +1069,7 @@ document.querySelector("#quoteToPost").addEventListener("click", () => {
   const prefill = `引用《${reading.title}》${passage.label}：\n\nEnglish: ${passage.en}\n\n中文译稿：${passage.zh}\n\n我的问题：`;
   openComposer(prefill);
   boardSelect.value = "translation";
+  selectDefaultTagsForBoard(boardSelect.value);
 });
 
 termList.addEventListener("click", (event) => {
@@ -964,6 +1079,7 @@ termList.addEventListener("click", (event) => {
   const prefill = `术语讨论：${button.dataset.term}\n\n出处：《${reading.title}》\n说明：${button.dataset.termNote}\n\n我的问题：`;
   openComposer(prefill);
   boardSelect.value = "translation";
+  selectDefaultTagsForBoard(boardSelect.value);
 });
 
 readingNoteForm.addEventListener("submit", async (event) => {
@@ -1017,6 +1133,7 @@ workPage.addEventListener("click", (event) => {
     const prefill = `引用《${work.title}》：\n\nEnglish: ${work.sampleEn}\n\n中文译稿：${work.sampleZh}\n\n我的问题：`;
     openComposer(prefill);
     boardSelect.value = work.board;
+    selectDefaultTagsForBoard(boardSelect.value);
   }
 });
 

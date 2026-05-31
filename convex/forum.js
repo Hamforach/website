@@ -1,6 +1,19 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+const tagCategory = v.union(
+  v.literal("period"),
+  v.literal("language"),
+  v.literal("tradition"),
+  v.literal("topic"),
+  v.literal("source-type"),
+);
+
+const tagValue = v.object({
+  name: v.string(),
+  category: tagCategory,
+});
+
 function relativeTime(timestamp) {
   const diff = Date.now() - timestamp;
   if (diff < 60_000) return "just now";
@@ -30,7 +43,8 @@ export const listThreads = query({
           board: thread.board,
           title: thread.title,
           author: thread.author,
-          tag: thread.tag,
+          tag: thread.tag || thread.tags?.[0]?.name || "discussion",
+          tags: thread.tags || (thread.tag ? [{ name: thread.tag, category: "topic" }] : []),
           body: thread.body,
           replies: replies
             .sort((a, b) => a.createdAt - b.createdAt)
@@ -53,12 +67,15 @@ export const createThread = mutation({
     board: v.string(),
     title: v.string(),
     author: v.string(),
-    tag: v.string(),
+    tag: v.optional(v.string()),
+    tags: v.optional(v.array(tagValue)),
     body: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("threads", {
       ...args,
+      tag: args.tag || args.tags?.[0]?.name || "discussion",
+      tags: args.tags || [],
       views: 1,
       pinned: false,
       updatedAt: Date.now(),

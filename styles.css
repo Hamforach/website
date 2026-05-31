@@ -555,6 +555,50 @@ a {
   font-weight: 800;
 }
 
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 8px;
+  padding: 0 8px;
+  background: color-mix(in srgb, var(--paper) 86%, var(--accent) 14%);
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.tag-chip small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tag-chip[data-category="language"] {
+  background: color-mix(in srgb, var(--green) 14%, var(--paper));
+}
+
+.tag-chip[data-category="tradition"] {
+  background: color-mix(in srgb, var(--gold) 18%, var(--paper));
+}
+
+.tag-chip[data-category="period"] {
+  background: color-mix(in srgb, var(--red) 10%, var(--paper));
+}
+
+.tag-chip[data-category="source-type"] {
+  background: color-mix(in srgb, var(--blue) 13%, var(--paper));
+}
+
 .thread-cell {
   color: var(--muted);
   font-size: 13px;
@@ -1160,6 +1204,15 @@ a {
   gap: 7px;
   color: var(--muted);
   font-weight: 700;
+}
+
+.tag-picker-label select {
+  min-height: 138px;
+}
+
+.tag-picker-label option,
+.tag-picker-label optgroup {
+  font-size: 13px;
 }
 
 .form-actions {
