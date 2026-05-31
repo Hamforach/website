@@ -1,181 +1,168 @@
 # Arcana Commons Forum
 
-Language: 中文 / English
+中文 / English
 
-Arcana Commons 是一個靜態論壇原型，主題聚焦於神祕學研究、公版文本、中英對照閱讀、來源核驗與學術討論。
+Arcana Commons 是一个面向公版文本、神秘学研究、中英对照阅读、来源核验与学术讨论的静态论坛原型。项目现在已经加入 Convex 后端接入层，可以在配置后把主题、回复、浏览数与阅读笔记保存到 Convex；未配置 Convex 时会自动回退到浏览器 `localStorage`。
 
-Arcana Commons is a static prototype for an occult studies forum focused on public-domain texts, bilingual reading, source verification, and scholarly discussion.
+Arcana Commons is a static forum prototype for public-domain texts, occult studies, bilingual reading, source verification, and scholarly discussion. The project now includes a Convex backend integration layer. When configured, threads, replies, view counts, and reading notes are stored in Convex; without Convex configuration, the app falls back to browser `localStorage`.
 
-目前版本使用純 HTML、CSS 與 JavaScript 製作。可以直接用瀏覽器開啟，也可以透過任何靜態檔案伺服器預覽。
+## 功能概览 / Features
 
-The current build is plain HTML, CSS, and JavaScript. It can be opened directly in a browser or served with any static file server.
+- 论坛分区：公版文本、中英对照、研究札记、站务与共建。
+- Forum boards: public-domain texts, bilingual reading, research notes, and site operations.
 
-## 中文說明
+- 主题索引：支持版块筛选、关键词搜索、回复数/浏览数/最近活动排序。
+- Thread index: board filtering, keyword search, and sorting by replies, views, or recent activity.
 
-### 主要區塊
+- 主题详情：弹窗查看正文、标签、作者、回复与回复表单。
+- Thread detail view: modal display for body, tags, author, replies, and reply form.
 
-#### 頁首導覽
+- 中英对照阅读：支持段落切换、字号调整、双栏/单栏切换、术语卡和引用发帖。
+- Bilingual reader: passage switching, font-size controls, parallel/single-column layouts, glossary cards, and quote-to-thread actions.
 
-頁首呈現 Arcana Commons 的網站識別，並提供前往論壇版塊、中英閱讀、主題索引與公版書庫的快速入口。右側包含主題切換按鈕與建立新主題的按鈕。
+- 公版书库：提供文本档案入口，并展示年代、类别、状态、资源与讨论入口。
+- Public-domain library: archive entries with date, category, status, resources, and discussion links.
 
-#### 論壇公告
+- 阅读笔记：按阅读文本和段落保存笔记。
+- Reading notes: notes are saved by reading text and passage.
 
-公告列說明論壇的編輯原則：討論應以公版文本、書目整理、翻譯校勘與閱讀札記為核心。發文前應盡量標註文本來源。
+- Convex 后端：可保存主题、回复、阅读笔记与浏览数。
+- Convex backend: stores threads, replies, reading notes, and view counts.
 
-#### 版塊側欄
+## 技术栈 / Tech Stack
 
-版塊側欄將論壇整理為幾個主要分區：
+- 前端：原生 HTML、CSS、JavaScript。
+- Frontend: plain HTML, CSS, and JavaScript.
 
-- 公版文本：書目、版本、來源連結與掃描資料。
-- 中英對照：譯文校勘、術語表與平行文本討論。
-- 研究札記：閱讀筆記、象徵系統與方法論討論。
-- 站務與共建：版規、資料提交、功能建議與社群維護。
+- 后端：Convex。
+- Backend: Convex.
 
-#### 主題索引
+- 本地回退：`localStorage`。
+- Local fallback: `localStorage`.
 
-主題索引是主要討論區。它支援依版塊篩選、搜尋、依最近活動/回覆數/瀏覽數排序，以及開啟主題詳情。預設主題用於示範論壇早期可能出現的討論方向。
+## 文件结构 / File Structure
 
-#### 主題詳情
+```text
+.
+├── index.html
+├── styles.css
+├── script.js
+├── config.example.js
+├── convex/
+│   ├── schema.js
+│   ├── forum.js
+│   └── _generated/
+├── package.json
+├── package-lock.json
+├── CONVEX_INTEGRATION.md
+└── README.md
+```
 
-主題詳情以彈窗形式開啟。每個主題會顯示所屬版塊、標籤、作者、正文、既有回覆與回覆表單。原型階段的回覆資料會儲存在瀏覽器本機。
+- `index.html`：页面结构、导航、弹窗与文本档案容器。
+- `index.html`: page structure, navigation, modals, and archive containers.
 
-#### 公版書庫
+- `styles.css`：布局、主题、响应式样式与阅读/档案页面视觉。
+- `styles.css`: layout, themes, responsive styling, and reader/archive visuals.
 
-公版書庫是一個簡潔的文本入口。點選書目後會進入對應的二級文本檔案頁。
+- `script.js`：论坛渲染、搜索排序、阅读器交互、发帖回复、Convex/本地存储切换。
+- `script.js`: forum rendering, search and sorting, reader interactions, posting/replying, and Convex/local persistence switching.
 
-#### 中英對照閱讀
+- `convex/schema.js`：Convex 数据表定义。
+- `convex/schema.js`: Convex table schema.
 
-閱讀面板呈現英文與中文譯稿的段落對照，並加入小型閱讀工作台。目前包含赫爾墨斯文本與比較神話相關示例。
+- `convex/forum.js`：Convex 查询与 mutation 函数。
+- `convex/forum.js`: Convex queries and mutations.
 
-閱讀功能包括：
+- `config.example.js`：Convex URL 配置示例。
+- `config.example.js`: example Convex URL configuration.
 
-- 在同一文本內切換不同段落。
-- 調整閱讀字號。
-- 切換雙欄與單欄閱讀模式。
-- 查看核心術語卡。
-- 將本機閱讀筆記儲存到 `localStorage`。
-- 將當前段落或術語引用到新論壇主題中。
+## 本地运行 / Local Usage
 
-#### 文本檔案頁
+安装依赖：
 
-二級界面採用文獻索引式結構，風格參考早期網路書目網站。每個文本檔案頁包含：
+Install dependencies:
 
-- 標題與副標題。
-- 年代、類別、文本狀態與相關論壇版塊。
-- 編輯說明。
-- 原始文本資源。
-- 評注與研究資源。
-- 中英對照樣例。
-- 前往相關版塊或引用樣例建立新主題的操作。
+```bash
+npm install
+```
 
-#### 發文器
+启动 Convex：
 
-發文器以彈窗形式提供建立新主題的介面，包括標題、版塊與正文欄位。在目前原型中，新主題會儲存在 `localStorage`。
+Start Convex:
 
-### 檔案結構
+```bash
+npx convex dev
+```
 
-- `index.html`：頁面結構、彈窗、導覽與文本檔案容器。
-- `styles.css`：版面、字體、響應式設計、明暗主題與文本檔案頁樣式。
-- `script.js`：版塊渲染、搜尋、排序、主題互動、閱讀切換、檔案頁渲染與本機資料保存。
-- `README.zh-Hant.md`：獨立繁體中文說明文檔。
+复制示例配置：
 
-### 資料保存
+Copy the example config:
 
-本原型尚未接入後端。使用者建立的主題、回覆、閱讀筆記與主題偏好會儲存在瀏覽器的 `localStorage`。
+```bash
+cp config.example.js config.js
+```
 
-### 公開部署準備
+然后把 `config.js` 中的地址改成你的 Convex 部署地址：
 
-前端已加入集中式資料存取層，之後可將目前的 `localStorage` 儲存替換為伺服器 API。動態渲染內容也會先進行 HTML 轉義，以降低公開接入使用者內容時的 XSS 風險。
+Then update `config.js` with your Convex deployment URL:
 
-### 後續計畫
+```js
+window.CONVEX_URL = "https://your-deployment.convex.cloud";
+```
 
-- 為版塊頁與文本檔案頁加入正式路由。
-- 以後端資料庫取代示範資料。
-- 加入帳號系統與管理權限。
-- 增加來源欄位：版權狀態、版本、頁碼與 URL。
-- 加入段落級中英對齊與術語表連結。
+如果使用本地 Convex 开发环境，也可以填入：
 
-## English
+For local Convex development, you can use:
 
-### Main Sections
+```js
+window.CONVEX_URL = "http://127.0.0.1:3210";
+```
 
-#### Header Navigation
+最后直接用浏览器打开 `index.html`，或通过任意静态文件服务器预览。
 
-The top header introduces the Arcana Commons identity and provides quick navigation to the forum boards, bilingual reader, thread index, and public-domain library. It also includes a theme toggle and a button for creating a new thread.
+Finally, open `index.html` directly in a browser or serve the folder with any static file server.
 
-#### Forum Notice
+## 数据保存 / Persistence
 
-The notice strip explains the forum's editorial principle: discussions should focus on public-domain texts, bibliography, translation review, and reading notes. It reminds contributors to cite text sources before posting.
+配置 Convex 后：
 
-#### Board Sidebar
+When Convex is configured:
 
-The board sidebar organizes the forum into several primary areas:
+- 主题保存到 `threads` 表。
+- Threads are saved to the `threads` table.
 
-- Public-domain texts: bibliography, editions, source links, and scanned material.
-- Bilingual reading: translation review, terminology, and parallel text discussion.
-- Research notes: reading notes, symbolic systems, and methodology.
-- Site operations: rules, submissions, feature requests, and community maintenance.
+- 回复保存到 `replies` 表。
+- Replies are saved to the `replies` table.
 
-#### Thread Index
+- 阅读笔记保存到 `readingNotes` 表。
+- Reading notes are saved to the `readingNotes` table.
 
-The thread index is the main discussion surface. It supports board filtering, search, sorting by latest activity, replies, or views, and opening a thread detail view. Seed threads model likely early conversations for the forum.
+- 浏览数通过 Convex mutation 更新。
+- View counts are updated through a Convex mutation.
 
-#### Thread Detail View
+未配置 Convex 或连接失败时：
 
-Thread details open in a modal interface. Each thread shows its board, tag, author, body, existing replies, and a reply form. Replies are stored locally in the browser for prototype use.
+When Convex is not configured or unavailable:
 
-#### Public-Domain Library
+- 应用会自动回退到浏览器 `localStorage`。
+- The app automatically falls back to browser `localStorage`.
 
-The library list is a compact entry point into the text archive. Each item links into a secondary archive page for the selected work.
+## 后续计划 / Roadmap
 
-#### Bilingual Reader
+- 增加正式路由，用于版块页与文本档案页。
+- Add real routing for board pages and archive pages.
 
-The reader panel presents English and Chinese parallel passages with a small reading workspace. It currently includes examples for Hermetic and comparative mythology texts.
+- 增加账号系统与作者身份。
+- Add accounts and author identity.
 
-Reader features include:
+- 增加管理与审核权限。
+- Add moderation and admin permissions.
 
-- Passage switching within each selected text.
-- Adjustable reading font size.
-- Parallel-column and single-column layout modes.
-- Glossary cards for key terms.
-- Local reading notes saved in `localStorage`.
-- Quoting the current passage or a glossary term into a new forum thread.
+- 将静态书库数据迁移为可编辑数据。
+- Move static library/archive data into editable backend data.
 
-#### Text Archive Pages
+- 增加来源字段：版权状态、版本、页码、URL。
+- Add source metadata: copyright status, edition, page, and URL.
 
-The secondary interface follows a document-index style inspired by early web bibliography sites. Each archive page includes:
-
-- Title and subtitle.
-- Date, category, status, and related forum board.
-- Editorial overview.
-- Primary text resources.
-- Commentary resources.
-- Bilingual sample passage.
-- Actions to open the related board or quote the sample into a new thread.
-
-#### Composer
-
-The composer modal allows users to create a new local thread. It includes title, board, and body fields. In this prototype, created threads are saved to `localStorage`.
-
-### Files
-
-- `index.html`: page structure, modals, navigation, and archive containers.
-- `styles.css`: layout, typography, responsive behavior, light/dark themes, and archive styling.
-- `script.js`: board rendering, search, sorting, thread interactions, reader switching, archive page rendering, and local persistence.
-- `README.zh-Hant.md`: standalone Traditional Chinese documentation.
-
-### Persistence
-
-This prototype does not use a backend. User-created threads, replies, reading notes, and theme preference are stored in browser `localStorage`.
-
-### Public Deployment Preparation
-
-The frontend now uses a centralized data access layer, so the current `localStorage` behavior can later be replaced with server API calls. Dynamically rendered content is escaped before insertion into the page to reduce XSS risk when public user content is introduced.
-
-### Next Steps
-
-- Add real routing for board pages and text archive pages.
-- Replace seed data with a backend database.
-- Add user accounts and moderation roles.
-- Add source metadata fields for copyright status, edition, page, and URL.
+- 增加段落级中英对齐与术语表链接。
 - Add paragraph-level bilingual alignment and glossary linking.
