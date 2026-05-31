@@ -125,6 +125,47 @@ window.CONVEX_URL = "http://127.0.0.1:3210";
 
 Finally, open `index.html` directly in a browser or serve the folder with any static file server.
 
+## Cloudflare Pages 部署 / Cloudflare Pages Deployment
+
+推荐部署方式：
+
+Recommended deployment:
+
+1. 在 Cloudflare Pages 后台选择 **Connect to Git**。
+2. In Cloudflare Pages, choose **Connect to Git**.
+
+3. 选择 GitHub 仓库 `Hamforach/website`。
+4. Select the GitHub repository `Hamforach/website`.
+
+5. Framework preset 选择 `None`。
+6. Set framework preset to `None`.
+
+7. Build command 填写：
+8. Use this build command:
+
+```bash
+npm run build
+```
+
+9. Build output directory 填写：
+10. Use this build output directory:
+
+```text
+dist
+```
+
+如果要让线上论坛共享数据，请在 Cloudflare Pages 的环境变量里加入：
+
+To make the online forum share data, add this environment variable in Cloudflare Pages:
+
+```text
+CONVEX_URL=https://your-production-deployment.convex.cloud
+```
+
+构建脚本会把 `CONVEX_URL` 写入线上 `dist/config.js`。如果没有设置该环境变量，网站仍会运行，但每个访问者的数据只会保存在自己的浏览器 `localStorage` 中。
+
+The build script writes `CONVEX_URL` into the deployed `dist/config.js`. If the variable is not set, the site still runs, but each visitor's data is stored only in their own browser `localStorage`.
+
 ## 数据保存 / Persistence
 
 配置 Convex 后：
