@@ -586,6 +586,7 @@ const state = {
   readingPassage: 0,
   readerFont: Number(forumStore.loadPreference("reader-font", 1)),
   readerLayout: forumStore.loadPreference("reader-layout", "parallel"),
+  sideTermIndex: Number(forumStore.loadPreference("side-term-index", 0)),
   notes: loadReadingNotes(),
   work: "golden-bough",
   threads: loadThreads(),
@@ -601,6 +602,7 @@ const sortSelect = document.querySelector("#sortSelect");
 const forumShell = document.querySelector("#forums");
 const readerEntry = document.querySelector(".reader-entry");
 const readerPage = document.querySelector("#readerPage");
+const sideTermCard = document.querySelector("#sideTermCard");
 const threadDialog = document.querySelector("#threadDialog");
 const threadDetail = document.querySelector("#threadDetail");
 const composerDialog = document.querySelector("#composerDialog");
@@ -754,6 +756,38 @@ function getCurrentPassage() {
   const passages = extra?.passages || [{ label: "摘录", en: reading.en, zh: reading.zh }];
   if (state.readingPassage >= passages.length) state.readingPassage = 0;
   return passages[state.readingPassage];
+}
+
+function getSideTerms() {
+  return Object.entries(readingEnhancements).flatMap(([readingId, enhancement]) =>
+    (enhancement.terms || []).map(([term, note]) => ({
+      readingId,
+      readingTitle: readings[readingId].title,
+      term,
+      note,
+    })),
+  );
+}
+
+function renderSideTerm() {
+  const terms = getSideTerms();
+  if (!terms.length || !sideTermCard) return;
+
+  if (state.sideTermIndex >= terms.length) state.sideTermIndex = 0;
+  const item = terms[state.sideTermIndex];
+  sideTermCard.innerHTML = `
+    <span>${escapeHTML(item.readingTitle)}</span>
+    <strong>${escapeHTML(item.term)}</strong>
+    <p>${escapeHTML(item.note)}</p>
+  `;
+}
+
+function refreshSideTerm() {
+  const terms = getSideTerms();
+  if (!terms.length) return;
+  state.sideTermIndex = Math.floor(Math.random() * terms.length);
+  forumStore.savePreference("side-term-index", String(state.sideTermIndex));
+  renderSideTerm();
 }
 
 function renderReadingNotes() {
@@ -1013,6 +1047,7 @@ function render() {
   renderBooks();
   renderDigest();
   renderThreads();
+  renderSideTerm();
   renderReading();
   renderWorkPage();
 }
@@ -1050,6 +1085,7 @@ document.querySelector("#cancelComposer").addEventListener("click", () => compos
 document.querySelector("#closeThread").addEventListener("click", () => threadDialog.close());
 document.querySelector("#openReaderPage").addEventListener("click", openReaderPage);
 document.querySelector("#closeReaderPage").addEventListener("click", closeReaderPage);
+document.querySelector("#refreshSideTerm").addEventListener("click", refreshSideTerm);
 boardSelect.addEventListener("change", () => selectDefaultTagsForBoard(boardSelect.value));
 document.querySelector("#closeWorkPage").addEventListener("click", () => {
   workPage.hidden = true;

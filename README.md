@@ -37,7 +37,10 @@ Arcana Commons is a forum prototype for public-domain texts, occult studies, bil
 - Bilingual reader: passage switching, font-size controls, parallel/single-column layouts, glossary cards, and quote-to-thread actions.
 
 - 閱讀二級界面：首頁只保留閱讀入口，完整閱讀工作台進入專門界面，避免資訊堆疊。
-- Dedicated reader page: the home view keeps only a reading entry point, while the full reading workspace opens in a focused secondary interface.
+- Dedicated reader page: the full reading workspace opens in a focused secondary interface.
+
+- 側邊術語卡：首頁側邊欄保留可隨機刷新的研究術語卡。
+- Sidebar term card: the home sidebar keeps a refreshable research term card.
 
 - 公版書庫：提供文本檔案入口，並展示年代、類別、狀態、資源與討論入口。
 - Public-domain library: archive entries with date, category, status, resources, and discussion links.

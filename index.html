@@ -87,11 +87,16 @@
         </div>
       </section>
 
-      <aside class="reader-entry" id="reader" aria-label="中英对照阅读入口">
-        <button class="primary-button reader-entry-button" type="button" id="openReaderPage">
-          <strong>中英对照阅读</strong>
-          <span>Reading Desk</span>
-        </button>
+      <aside class="reader-entry term-sidebar" id="reader" aria-label="术语卡">
+        <div class="term-sidebar-head">
+          <div>
+            <h2>术语卡</h2>
+            <span>Research Term</span>
+          </div>
+          <button class="icon-button" type="button" id="refreshSideTerm" aria-label="刷新术语">↻</button>
+        </div>
+        <div class="side-term-card" id="sideTermCard"></div>
+        <button class="secondary-button reader-entry-button" type="button" id="openReaderPage">进入阅读界面</button>
       </aside>
 
       <section class="reader-panel reader-page" id="readerPage" hidden aria-label="中英对照阅读二级界面">
