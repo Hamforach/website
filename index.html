@@ -25,7 +25,7 @@
 
         <nav class="top-nav" aria-label="主导航">
           <a href="#forums">版块</a>
-          <a href="#reader">中英阅读</a>
+          <a href="#reader">平行文本</a>
           <a href="#threads">主题</a>
           <a href="#library">书库</a>
         </nav>
@@ -87,26 +87,34 @@
         </div>
       </section>
 
-      <aside class="reader-entry term-sidebar" id="reader" aria-label="术语卡">
-        <div class="term-sidebar-head">
-          <div>
-            <h2>术语卡</h2>
-            <span>Research Term</span>
+      <aside class="reader-entry term-sidebar" id="reader" aria-label="术语索引">
+        <section class="term-module">
+          <div class="term-sidebar-head">
+            <div>
+              <h2>术语索引</h2>
+              <span>Research Term</span>
+            </div>
+            <button class="icon-button" type="button" id="refreshSideTerm" aria-label="刷新术语">↻</button>
           </div>
-          <button class="icon-button" type="button" id="refreshSideTerm" aria-label="刷新术语">↻</button>
-        </div>
-        <div class="side-term-card" id="sideTermCard"></div>
-        <button class="secondary-button reader-entry-button" type="button" id="openReaderPage">进入阅读界面</button>
+          <div class="side-term-card" id="sideTermCard"></div>
+        </section>
+
+        <section class="reader-launch-module" aria-label="平行文本校勘台入口">
+          <button class="secondary-button reader-entry-button" type="button" id="openReaderPage">
+            <strong>平行文本校勘台</strong>
+            <span>Parallel Text Desk</span>
+          </button>
+        </section>
       </aside>
 
-      <section class="reader-panel reader-page" id="readerPage" hidden aria-label="中英对照阅读二级界面">
+      <section class="reader-panel reader-page" id="readerPage" hidden aria-label="平行文本校勘台">
         <div class="work-nav">
           <button class="secondary-button" type="button" id="closeReaderPage">← 返回论坛</button>
         </div>
 
         <div class="section-title">
-          <h2>中英对照阅读</h2>
-          <span>Reading Desk</span>
+          <h2>平行文本校勘台</h2>
+          <span>Parallel Text Desk</span>
         </div>
 
         <div class="reader-tabs" role="tablist" aria-label="阅读文本">

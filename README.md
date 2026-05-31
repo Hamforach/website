@@ -24,8 +24,8 @@ Arcana Commons is a forum prototype for public-domain texts, occult studies, bil
 
 ## 功能概覽 / Features
 
-- 論壇分區：公版文本、中英對照、研究札記、站務與共建。
-- Forum boards: public-domain texts, bilingual reading, research notes, and site operations.
+- 論壇分區：公版文本、平行文本、研究札記、站務與共建。
+- Forum boards: public-domain texts, parallel texts, research notes, and site operations.
 
 - 主題索引：支援版塊篩選、關鍵詞搜尋、回覆數/瀏覽數/最近活動排序。
 - Thread index: board filtering, keyword search, and sorting by replies, views, or recent activity.
@@ -33,8 +33,8 @@ Arcana Commons is a forum prototype for public-domain texts, occult studies, bil
 - 主題詳情：彈窗查看正文、標籤、作者、回覆與回覆表單。
 - Thread detail view: modal display for body, tags, author, replies, and reply form.
 
-- 中英對照閱讀：支援段落切換、字號調整、雙欄/單欄切換、術語卡和引用發帖。
-- Bilingual reader: passage switching, font-size controls, parallel/single-column layouts, glossary cards, and quote-to-thread actions.
+- 平行文本校勘台：支援段落切換、字號調整、雙欄/單欄切換、術語卡和引用發帖。
+- Parallel Text Desk: passage switching, font-size controls, parallel/single-column layouts, glossary cards, and quote-to-thread actions.
 
 - 閱讀二級界面：首頁只保留閱讀入口，完整閱讀工作台進入專門界面，避免資訊堆疊。
 - Dedicated reader page: the full reading workspace opens in a focused secondary interface.

@@ -668,14 +668,32 @@ a {
   padding: 14px;
 }
 
+.term-module,
+.reader-launch-module {
+  display: grid;
+  gap: 12px;
+}
+
+.reader-launch-module {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
 .reader-entry-button {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
-  min-height: 42px;
+  min-height: 52px;
   gap: 10px;
-  text-align: center;
+  text-align: left;
+}
+
+.reader-entry-button span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .reader-panel .section-title {

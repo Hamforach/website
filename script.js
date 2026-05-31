@@ -207,8 +207,8 @@ const boards = [
   },
   {
     id: "translation",
-    name: "中英对照",
-    desc: "译文校勘、术语表和双语阅读",
+    name: "平行文本",
+    desc: "译文校勘、术语表和双语文本",
     countLabel: "译稿",
   },
   {
@@ -332,7 +332,7 @@ const seedThreads = [
   {
     id: "bilingual-reader",
     board: "translation",
-    title: "中英对照阅读页需要哪些基础功能？",
+    title: "平行文本校勘台需要哪些基础功能？",
     author: "Sunmaker",
     tag: "产品设计",
     body: "初版希望支持左右双栏、术语高亮、引用到帖子、译注折叠。后面再考虑逐句版本对比。",
