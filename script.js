@@ -1,7 +1,8 @@
 const APP_CONFIG = {
   storagePrefix: "arcana",
   apiBaseUrl: "",
-  persistence: "local",
+  convexUrl: globalThis.CONVEX_URL || "",
+  persistence: globalThis.CONVEX_URL ? "convex" : "local",
 };
 
 const storageKey = (name) => `${APP_CONFIG.storagePrefix}-${name}`;
@@ -40,7 +41,108 @@ function writeJSON(key, value) {
   localStorage.setItem(storageKey(key), JSON.stringify(value));
 }
 
+const convexRuntime = {
+  client: null,
+  api: null,
+  unsubscribers: [],
+};
+
+function getConvexRuntime() {
+  if (!APP_CONFIG.convexUrl || !globalThis.convex?.ConvexClient || !globalThis.convex?.anyApi) {
+    return null;
+  }
+
+  if (!convexRuntime.client) {
+    convexRuntime.client = new globalThis.convex.ConvexClient(APP_CONFIG.convexUrl);
+    convexRuntime.api = globalThis.convex.anyApi;
+  }
+
+  return convexRuntime;
+}
+
 const forumStore = {
+  isRemote() {
+    return APP_CONFIG.persistence === "convex" && Boolean(getConvexRuntime());
+  },
+  startRemoteSync({ onThreads, onReadingNotes, onError }) {
+    const runtime = getConvexRuntime();
+    if (!runtime) return false;
+
+    try {
+      runtime.unsubscribers.forEach((unsubscribe) => unsubscribe?.());
+      runtime.unsubscribers = [
+        runtime.client.onUpdate(runtime.api.forum.listThreads, {}, onThreads),
+        runtime.client.onUpdate(runtime.api.forum.listReadingNotes, {}, onReadingNotes),
+      ];
+      return true;
+    } catch (error) {
+      onError?.(error);
+      return false;
+    }
+  },
+  async createThread(thread) {
+    const runtime = getConvexRuntime();
+    if (!runtime) return false;
+
+    try {
+      await runtime.client.mutation(runtime.api.forum.createThread, {
+        board: thread.board,
+        title: thread.title,
+        author: thread.author,
+        tag: thread.tag,
+        body: thread.body,
+      });
+      return true;
+    } catch (error) {
+      console.warn("Convex createThread failed; falling back to local storage.", error);
+      return false;
+    }
+  },
+  async addReply(threadId, reply) {
+    const runtime = getConvexRuntime();
+    if (!runtime) return false;
+
+    try {
+      await runtime.client.mutation(runtime.api.forum.addReply, {
+        threadId,
+        author: reply.author,
+        body: reply.body,
+      });
+      return true;
+    } catch (error) {
+      console.warn("Convex addReply failed; falling back to local storage.", error);
+      return false;
+    }
+  },
+  async incrementThreadViews(threadId) {
+    const runtime = getConvexRuntime();
+    if (!runtime) return false;
+
+    try {
+      await runtime.client.mutation(runtime.api.forum.incrementThreadViews, { threadId });
+      return true;
+    } catch (error) {
+      console.warn("Convex incrementThreadViews failed; keeping local view count.", error);
+      return false;
+    }
+  },
+  async saveReadingNote(note) {
+    const runtime = getConvexRuntime();
+    if (!runtime) return false;
+
+    try {
+      await runtime.client.mutation(runtime.api.forum.saveReadingNote, {
+        reading: note.reading,
+        passage: note.passage,
+        title: note.title,
+        body: note.body,
+      });
+      return true;
+    } catch (error) {
+      console.warn("Convex saveReadingNote failed; falling back to local storage.", error);
+      return false;
+    }
+  },
   loadThreads() {
     const saved = readJSON("threads", seedThreads);
     return Array.isArray(saved) ? saved : seedThreads;
@@ -672,13 +774,18 @@ function openWork(id) {
   workPage.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function openThread(id, incrementView = true) {
+async function openThread(id, incrementView = true) {
   const thread = state.threads.find((item) => item.id === id);
   if (!thread) return;
 
-  if (incrementView) thread.views += 1;
-  saveThreads();
-  renderThreads();
+  if (incrementView) {
+    const remoteUpdated = await forumStore.incrementThreadViews(thread.id);
+    if (!remoteUpdated) {
+      thread.views += 1;
+      saveThreads();
+      renderThreads();
+    }
+  }
 
   threadDetail.innerHTML = `
     <p class="eyebrow">${escapeHTML(getBoard(thread.board).name)} · ${escapeHTML(thread.tag)}</p>
@@ -714,7 +821,7 @@ function openComposer(prefill = "") {
   composerDialog.showModal();
 }
 
-function createThread(formData) {
+async function createThread(formData) {
   const thread = {
     id: makeId("thread"),
     board: formData.get("board"),
@@ -728,9 +835,13 @@ function createThread(formData) {
     pinned: false,
   };
 
-  state.threads.unshift(thread);
+  const remoteSaved = await forumStore.createThread(thread);
+  if (!remoteSaved) {
+    state.threads.unshift(thread);
+    saveThreads();
+  }
+
   state.board = thread.board;
-  saveThreads();
   render();
   composerDialog.close();
 }
@@ -780,12 +891,12 @@ document.querySelector("#closeWorkPage").addEventListener("click", () => {
   document.querySelector("#forums").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-composerForm.addEventListener("submit", (event) => {
+composerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  createThread(new FormData(composerForm));
+  await createThread(new FormData(composerForm));
 });
 
-threadDetail.addEventListener("submit", (event) => {
+threadDetail.addEventListener("submit", async (event) => {
   const form = event.target.closest("[data-reply-thread]");
   if (!form) return;
   event.preventDefault();
@@ -795,10 +906,16 @@ threadDetail.addEventListener("submit", (event) => {
   const body = textarea.value.trim();
   if (!thread || !body) return;
 
-  thread.replies.push({ author: "Sunmaker", body, time: "刚刚" });
-  thread.updated = "刚刚";
-  saveThreads();
-  openThread(thread.id, false);
+  const reply = { author: "Sunmaker", body, time: "刚刚" };
+  const remoteSaved = await forumStore.addReply(thread.id, reply);
+  if (!remoteSaved) {
+    thread.replies.push(reply);
+    thread.updated = "刚刚";
+    saveThreads();
+    await openThread(thread.id, false);
+  } else {
+    threadDialog.close();
+  }
 });
 
 document.querySelector(".reader-tabs").addEventListener("click", (event) => {
@@ -849,22 +966,28 @@ termList.addEventListener("click", (event) => {
   boardSelect.value = "translation";
 });
 
-readingNoteForm.addEventListener("submit", (event) => {
+readingNoteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const textarea = readingNoteForm.elements.note;
   const body = textarea.value.trim();
   if (!body) return;
 
-  state.notes.push({
+  const note = {
     reading: state.reading,
     passage: state.readingPassage,
     title: `${readings[state.reading].title} / ${getCurrentPassage().label}`,
     body,
     time: "刚刚",
-  });
+  };
+
+  const remoteSaved = await forumStore.saveReadingNote(note);
+  if (!remoteSaved) {
+    state.notes.push(note);
+    saveReadingNotes();
+    renderReadingNotes();
+  }
+
   textarea.value = "";
-  saveReadingNotes();
-  renderReadingNotes();
 });
 
 document.querySelector("#openReadingArchive").addEventListener("click", () => {
@@ -907,3 +1030,22 @@ if (forumStore.loadPreference("theme", "light") === "dark") {
 }
 
 render();
+
+forumStore.startRemoteSync({
+  onThreads(threads) {
+    if (Array.isArray(threads)) {
+      state.threads = threads;
+      renderBoards();
+      renderThreads();
+    }
+  },
+  onReadingNotes(notes) {
+    if (Array.isArray(notes)) {
+      state.notes = notes;
+      renderReadingNotes();
+    }
+  },
+  onError(error) {
+    console.warn("Convex sync unavailable; using local storage.", error);
+  },
+});
